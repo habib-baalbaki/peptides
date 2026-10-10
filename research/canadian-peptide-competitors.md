@@ -1,6 +1,6 @@
-# Canadian Peptide Websites: Competitor & UX Research
+# NXT Peptides Canada: Competitor & UX Research
 
-_Compiled 2026-10-08. Every claim below (purity, testing, "made in Canada", customer counts) is the seller's own marketing. None of it was independently verified._
+_Compiled 2026-10-08, updated 2026-10-10 with NXT positioning and catalogue. Every claim below (purity, testing, "made in Canada", customer counts) is the seller's own marketing. None of it was independently verified._
 
 ---
 
@@ -12,6 +12,74 @@ _Compiled 2026-10-08. Every claim below (purity, testing, "made in Canada", cust
 - Tirzepatide and semaglutide are approved in Canada only as prescription drugs (Mounjaro/Zepbound, Ozempic/Wegovy). Selling "research" versions is exactly what the advisories target.
 
 **Implication:** copying the "research use only" model the market uses is not a legal shield. Talk to a Canadian regulatory or health lawyer before launch. Lower-risk models: cosmetic peptides (GHK-Cu creams, sold as cosmetics under the Cosmetic Regulations), a licensed compounding pharmacy or clinic partnership with prescriptions, or an information/comparison site that doesn't sell drugs.
+
+---
+
+## 0. Who we are: NXT Peptides Canada
+
+### Positioning (use everywhere: hero, About, footer, packaging inserts)
+> **Canadian-based. UK-tested & validated. Bringing NXT to Canada.**
+
+| ✅ Say | ❌ Never say |
+|---|---|
+| "Canadian-based" / "Canadian-owned & operated" | "Made in Canada", "Canadian-made", "Manufactured in Canada", "Product of Canada" |
+| "Independently tested & validated in the UK" | "Canadian lab tested", "Health Canada approved / certified" |
+| "Bringing NXT to Canada" / "Official NXT partner in Canada"* | "Canada's #1" or any other claim we can't back up |
+| "Ships from Canada, so no customs delays"** | "Pharmaceutical grade", "for human use" |
+| "Manufactured in a GMP-compliant facility"*** | |
+
+\* Only if NXT has formally authorized us. Get the distribution agreement in writing first.
+\** Only if stock is actually held and shipped inside Canada. Confirm this before using the line.
+\*** This wording is printed on the vials. Keep the supplier's GMP documentation on file in case anyone asks.
+
+**Why the wording matters:** under the Competition Act, a false or misleading country-of-origin claim is deceptive marketing. Competition Bureau guidance says "Product of Canada" needs about 98% Canadian content, and "Made in Canada" needs the last substantial transformation done in Canada. Our products meet neither test, so "Canadian-based" is the accurate claim. We can turn this into an advantage. Peptide Warehouse attacks competitors who make *"vague 'Made in Canada' claims"*. Being upfront ("we're Canadian; our products are made in a GMP facility and validated by an independent UK lab") reads as more honest than the vague claims most competitors make.
+
+**Making the UK testing claim stick:** name the UK lab on the site. Publish each batch's COA on its product page, showing the lab name, report date, lot number, HPLC purity and MS identity. Print the matching lot number on every vial. A "UK-tested" badge without the reports behind it is just another unverifiable claim.
+
+### Our catalogue (from `NXT_Catalogue_0426.pdf`, 18 pages)
+
+| # | Product | Size | Competitor price band (CAD, single vial)† | Health Canada Apr 2026 seized list? |
+|---|---------|------|--------------------------------------------|-------------------------------------|
+| 1 | BPC-157 | 10 mg | $49.99 – $92.99 | ⚠️ Yes |
+| 2 | TB-500 | 10 mg | $79.99 – $99.99 | ⚠️ Yes |
+| 3 | BPC-157 + TB-500 | 10 mg | $79.99 – $179.99 | ⚠️ Yes |
+| 4 | CJC-1295 + Ipamorelin | 10 mg | $72.99 – $94.99 | ⚠️ Yes |
+| 5 | Ipamorelin | 5 mg | ~$99.99 | ⚠️ Yes |
+| 6 | GHRP-6 | 10 mg | ~$59.99 | — |
+| 7 | Tesamorelin | 5 mg | $99.99 – $134.99 | — |
+| 8 | GHK-Cu | 50 mg | $48.99 – $69.99 | ⚠️ Yes |
+| 9 | GLOW (GHK-Cu 50 + BPC-157 10 + TB-500 10) | 70 mg | $94.99 – $199.99 | ⚠️ Contains listed peptides |
+| 10 | KLOW (GHK-Cu 50 + KPV 10 + BPC-157 10 + TB-500 10) | 80 mg | $99.99 – $219.99 | ⚠️ Contains listed peptides |
+| 11 | Kisspeptin-10 | 10 mg | ~$59.99 – $84.99 | — |
+| 12 | MOTS-c | 10 mg | $39.99 – $65.00 | ⚠️ Yes |
+| 13 | NAD+ | 500 mg | $99.99 – $114.99 | ⚠️ Yes |
+| 14 | PT-141 | 10 mg | ~$59.99 – $64.99 | — |
+| 15 | Retatrutide ("RETA" / "R3TA") | 20 mg | $119 – $450 (size varies) | ⚠️ Yes (also specifically named as unauthorized) |
+| 16 | SS-31 | 10 mg | $64.99 – $79.99 | ⚠️ Yes |
+| 17 | Bacteriostatic water | 10 mL | ~$19.99 (30 mL) | — |
+
+† Taken from the competitor sites in Section 1, so it's a rough guide only. A "—" in the last column means the compound wasn't among the examples named in the advisory. It does **not** mean the compound is authorized; none of these is an approved drug in Canada.
+
+The catalogue on pages 2–18 covers 17 SKUs. KLOW, PT-141, TB-500, NAD+, Tesamorelin and bacteriostatic water also appear on the cover.
+
+### Fix these in the catalogue before it goes on the site
+1. **Wrong descriptions.** The **CJC-1295 + Ipamorelin** page (p. 4) and the **PT-141** page (p. 13) both carry the **BPC-157 / TB-500** text. They need their own descriptions.
+2. **GLOW size conflict.** The heading says **100 mg**, but the vial label and the listed blend (50 + 10 + 10) both say **70 mg**.
+3. **Retatrutide naming.** The heading says "RETA" and the vial says "R3TA". Pick one, and include the full name "Retatrutide" so it can be found in search.
+4. **Stray text on SS-31** (p. 15): a leftover "ORDER QUANTITY" line.
+5. **Boilerplate on every page:** "Studied for regenerative & repair pathways". It doesn't fit Kisspeptin-10, Retatrutide, NAD+, Tesamorelin, MOTS-c or bacteriostatic water. Write a line for each product, or drop it.
+6. **Footer text is written for wholesale** ("minimum order quantities may apply", "contact your account representative"). For the online store, replace it with "Batch COA (UK lab) available on this page".
+7. **Missing "tested in the UK" claim.** Nothing in the catalogue mentions UK testing. Add it, with the lab name.
+
+### What changes from nxtpeptides.com (US) for the Canadian site
+| nxtpeptides.com | NXT Canada site should |
+|---|---|
+| USD pricing, US phone number (469-…) and a Gmail address | Show CAD prices, a Canadian phone number and address, and an email on our own domain |
+| "All sales final – no returns" | Offer at least a damaged/incorrect-item policy. Competitors that do (Luxara, Durham) look more trustworthy. |
+| Catalogue also lists Semax, Glutathione, MT-2, KPV, DSIP, IGF-1 LR3, BPC/TB 20 mg and needles | Start with the 17 catalogue SKUs and add the others once supply is confirmed |
+| English only | Add **French** for visitors from Québec. The Charter of the French Language (Bill 96) requires French on commercial websites. |
+| "2-day shipping", "24/7 customer care" | State Canada Post Xpresspost times and real support hours |
+| Subscribe for 15% off | Keep this. It matches the market's 10%-off-first-order standard. |
 
 ---
 
@@ -116,12 +184,13 @@ Also named in review roundups, with little detail: MaplePep, Particle Peptides C
 
 ## 3. Recommended UX blueprint for our site
 
+0. **Brand line in the hero:** "Canadian-based · UK-tested & validated · Bringing NXT to Canada", followed by the COA link. Don't use any "Made in Canada" badge.
 1. **Header:** announcement bar (shipping threshold and cutoff), logo, search with autocomplete, Shop (mega-menu by goal and by format), Lab Results, Calculator, Learn, Account, Cart with a free-shipping progress bar.
 2. **Homepage:** hero with a concrete promise and one CTA; trust strip (tested / ships from Canada / same-day / secure pay); shop by goal (with counts); best sellers; inline calculator; "How to read our COA"; real reviews; FAQ; newsletter.
 3. **Product page:** variant picker (size × qty) showing **$/mg**; lot-matched COA viewer (PDF inline plus key numbers); specs (sequence, MW, CAS, form, storage); "frequently bought with" BAC water and syringes; in-stock status and back-in-stock alerts; shipping ETA by postal code.
 4. **Checkout:** guest checkout; Interac plus card and wallets where a processor allows; cold-pack add-on; Canada Post Xpresspost with tracking; clear tax (GST/HST by province).
 5. **Account:** order history, one-click reorder, reward points, saved COAs for past orders.
-6. **Trust and compliance:** one-domain notice; batch "Verify" lookup; real business address; plain-language legal page. Run the copy past a lawyer, given the 2026 enforcement.
+6. **Trust and compliance:** "UK Lab Results" page (lab name plus per-batch COAs); an About page that tells the "Canadian-based, bringing NXT to Canada" story and states plainly where products are made and where they're tested; one-domain notice; batch "Verify" lookup; real business address; plain-language legal page. Run the copy past a lawyer, given the 2026 enforcement.
 7. **Performance:** fast, mobile-first build, Core Web Vitals green, schema.org Product and Organization markup (Popular already does this well).
 
 ---
@@ -135,3 +204,5 @@ Also named in review roundups, with little detail: MaplePep, Particle Peptides C
 - Vendor roundups: https://www.peptideprotocolwiki.com/blog/best-canadian-peptide-vendors-2026 · https://www.peptidedeck.com/blog/best-canadian-peptide-vendors-2026 · https://peptidestoday.ca/vendors/vpeptide-review/
 - Trustpilot pages: https://ca.trustpilot.com/review/puritypeptides.ca · https://uk.trustpilot.com/review/peptidesourcecanada.is
 - Vendor homepages as linked in the table above (extracted 2026-10-08).
+- NXT catalogue: `NXT_Catalogue_0426.pdf` (provided by the team); NXT US site: https://nxtpeptides.com/ (extracted 2026-10-10)
+- Competition Bureau Canada, "Product of Canada" and "Made in Canada" claims guidelines (Competition Act)
