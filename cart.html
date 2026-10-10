@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cart | NXT Peptides Canada</title>
+<meta name="description" content="Your cart.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="cart">
+<div id="site-header"></div>
+<main>
+
+<div class="container">
+  <div class="cart-layout">
+    <div>
+      <h1 style="font-size:2rem;margin-top:8px">Your cart</h1>
+      <div id="lines"></div>
+    </div>
+    <aside>
+      <div class="summary">
+        <div id="sum"></div>
+        <form class="stack" id="checkout" hidden>
+          <label>Full name <input name="name" required autocomplete="name"></label>
+          <label>Email <input name="email" type="email" required autocomplete="email"></label>
+          <label>Street address <input name="address" required autocomplete="street-address"></label>
+          <div class="split" style="gap:12px">
+            <label>City <input name="city" required autocomplete="address-level2"></label>
+            <label>Postal code <input name="postal" required autocomplete="postal-code" pattern="[A-Za-z][0-9][A-Za-z] ?[0-9][A-Za-z][0-9]" title="e.g. M5V 2T6"></label>
+          </div>
+          <label>Province
+            <select name="province" required>
+              <option value="">Select…</option>
+              <option>AB</option><option>BC</option><option>MB</option><option>NB</option><option>NL</option><option>NS</option><option>NT</option><option>NU</option><option>ON</option><option>PE</option><option>QC</option><option>SK</option><option>YT</option>
+            </select>
+          </label>
+          <label>Payment method
+            <select name="pay" required>
+              <option>Interac e-Transfer</option>
+            </select>
+          </label>
+          <label class="check"><input type="checkbox" required> <span class="small">I confirm I am 18+ and these products are for laboratory research use only, not for human or veterinary use.</span></label>
+          <button class="btn block" type="submit">Place order request</button>
+          <p class="small muted" style="margin:0">You'll receive Interac e-Transfer instructions by email. Your order ships once payment is received.</p>
+          <p class="small" id="done" hidden>✅ Your email app should open with the order details. If it didn't, email us at the address on the Contact page.</p>
+        </form>
+      </div>
+    </aside>
+  </div>
+</div>
+</main>
+<div id="site-footer"></div>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>
