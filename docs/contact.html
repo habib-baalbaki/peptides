@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact | NXT Peptides Canada</title>
+<meta name="description" content="Contact NXT Peptides Canada.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="contact">
+<div id="site-header"></div>
+<main>
+
+<section class="page-head"><div class="container">
+  <p class="eyebrow">Support</p>
+  <h1 style="font-size:clamp(1.8rem,3.4vw,2.6rem)">Contact us</h1>
+  <p class="muted" style="margin:0">Canadian support team · Mon–Fri, 9 AM – 5 PM ET</p>
+</div></section>
+<section class="section container">
+  <div class="split">
+    <div class="panel">
+      <h3>Send a message</h3>
+      <form class="stack" onsubmit="event.preventDefault();this.innerHTML='<p>Thanks, we\'ll reply within one business day.</p>'">
+        <label>Name <input required autocomplete="name"></label>
+        <label>Email <input type="email" required autocomplete="email"></label>
+        <label>Order number (optional) <input></label>
+        <label>Message <textarea rows="5" required></textarea></label>
+        <button class="btn" type="submit">Send</button>
+      </form>
+    </div>
+    <div class="panel">
+      <h3>Other ways to reach us</h3>
+      <p class="muted">Email: <span id="c-email"></span></p>
+      <p class="muted small">We can't answer questions about dosing or personal use. Our products are for laboratory research only.</p>
+      <p class="muted small"><strong>Our only website is <span id="c-domain"></span>.</strong> We don't sell through any other domain or through social-media messages.</p>
+    </div>
+  </div>
+</section>
+<script>document.addEventListener("DOMContentLoaded",()=>{document.getElementById("c-email").textContent=NXT_CONFIG.email;document.getElementById("c-domain").textContent=NXT_CONFIG.domain;});</script>
+</main>
+<div id="site-footer"></div>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

@@ -16,7 +16,13 @@ window.NXT_CONFIG = {
   email: "orders@example.ca",     // TODO real address on own domain
   phone: "",                      // TODO Canadian phone number
   pricesArePlaceholders: true,    // TODO set false once real prices are entered below
-  domain: "nxtpeptides.ca"        // TODO the one official domain
+  domain: "nxtpeptides.ca",       // TODO the one official domain
+  // TODO paste your receiving addresses. Empty = we email the address after the order.
+  wallets: {
+    BTC: "",                      // bc1...
+    USDT: "",                     // state the network too, e.g. "T... (TRC-20)"
+    ETH: ""                       // 0x...
+  }
 };
 
 window.NXT_CATEGORIES = [

@@ -295,6 +295,13 @@
         const r = e.target.closest("[data-rm]");
         if (r) { cart.setQty(r.dataset.rm, 0); draw(); }
       });
+      const wallet = () => {
+        const pay = $("#checkout").pay.value, addr = (C.wallets || {})[pay];
+        $("#wallet").hidden = !addr;
+        $("#wallet").innerHTML = addr ? `Send the order total in ${esc(pay)} to:<br><strong>${esc(addr)}</strong><br>Your order ships once the payment confirms.` : "";
+        return addr;
+      };
+      $("#checkout").pay.addEventListener("change", wallet);
       $("#checkout").addEventListener("submit", (e) => {
         e.preventDefault();
         const f = new FormData(e.target);
@@ -306,7 +313,7 @@
           "ORDER REQUEST", "", ...lines, "",
           `Subtotal: ${money(sub)}`, `Shipping: ${ship ? money(ship) : "Free"}`, `Total before tax: ${money(sub + ship)} ${C.currency}`, "",
           `Name: ${f.get("name")}`, `Email: ${f.get("email")}`, `Address: ${f.get("address")}, ${f.get("city")}, ${f.get("province")} ${f.get("postal")}`,
-          `Payment: ${f.get("pay")}`, "", "Purchaser confirms items are for laboratory research use only and that they are 18+."
+          `Payment: ${f.get("pay")}${wallet() ? ` to ${wallet()}` : ""}`, "", "Purchaser confirms items are for laboratory research use only and that they are 18+."
         ].join("\n");
         // TODO replace with a real checkout (WooCommerce/Shopify/Stripe-compatible processor) before launch.
         location.href = `mailto:${C.email}?subject=${encodeURIComponent("Order request – NXT Peptides Canada")}&body=${encodeURIComponent(body)}`;
