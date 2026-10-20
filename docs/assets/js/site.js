@@ -9,6 +9,8 @@
   const $ = (s, r = document) => r.querySelector(s);
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const money = (n) => "$" + n.toFixed(2);
+  const price = (p) => p.price ? `${money(p.price)} <small>${C.currency}</small>` : "FREE";
+  const img = (p) => `assets/img/${p.img || "vial.svg"}`;
   const byId = (id) => P.find((p) => p.id === id);
   const catName = (id) => (CATS.find((c) => c.id === id) || {}).name || "";
   const page = document.body.dataset.page;
@@ -69,8 +71,9 @@
     const links = NAV.map(([h, t, k]) => `<a href="${h}"${k === page ? ' aria-current="page"' : ""}>${t}</a>`).join("");
     return `
       <div class="announce">
-        <span>Free Xpresspost shipping over ${money(C.freeShippingThreshold)} ${C.currency}</span>
-        <span>Orders before ${esc(C.sameDayCutoff)} ship same day</span>
+        <span>New customers: ${C.firstOrderDiscount * 100}% off your first order</span>
+        <span>Free shipping over ${money(C.freeShippingThreshold)} ${C.currency}</span>
+        <span>Free 3 mL BAC water with every delivery</span>
         <span>UK-tested &amp; validated</span>
       </div>
       ${C.pricesArePlaceholders ? '<div class="placeholder-bar">Preview build: prices, shipping terms and lab details are placeholders until confirmed.</div>' : ""}
@@ -145,13 +148,13 @@
       <article class="card">
         <a class="card-img" href="product.html?id=${p.id}">
           ${p.best ? '<span class="badge">Best seller</span>' : ""}
-          <img src="assets/img/${p.img}" alt="${esc(p.name)} ${esc(p.size)} vial" loading="lazy" width="440" height="550">
+          <img src="${img(p)}" alt="${esc(p.name)} ${esc(p.size)} vial" loading="lazy" width="440" height="550">
         </a>
         <div class="card-body">
           <a class="title" href="product.html?id=${p.id}"><span class="cap-dot" style="background:${p.cap}"></span>${esc(p.name)}</a>
           <span class="tag">${esc(p.size)} · ${esc(p.tagline)}</span>
           <div class="card-foot">
-            <span class="price">${money(p.price)} <small>${C.currency}</small></span>
+            <span class="price">${price(p)}</span>
             <button class="add-btn" data-add="${p.id}" aria-label="Add ${esc(p.name)} to cart">Add</button>
           </div>
         </div>
@@ -207,12 +210,12 @@
       document.title = `${p.name} ${p.size} | NXT Peptides Canada`;
       const lab = C.ukLabName || "Independent UK laboratory (name to be confirmed)";
       $("#pdp").innerHTML = `
-        <div class="pdp-img"><img src="assets/img/${p.img}" alt="${esc(p.name)} ${esc(p.size)} vial" width="440" height="550" style="width:100%"></div>
+        <div class="pdp-img"><img src="${img(p)}" alt="${esc(p.name)} ${esc(p.size)} vial" width="440" height="550" style="width:100%"></div>
         <div>
           <p class="eyebrow">${esc(catName(p.cat))}</p>
           <h1>${esc(p.name)} <span class="muted" style="font-weight:300">${esc(p.size)}</span></h1>
           <p class="tagline">${esc(p.tagline)}</p>
-          <div class="big-price">${money(p.price)} <small class="muted" style="font-size:.9rem;font-weight:400">${C.currency}</small></div>
+          <div class="big-price">${p.price ? `${money(p.price)} <small class="muted" style="font-size:.9rem;font-weight:400">${C.currency}</small>` : "FREE"}</div>
           <p class="small muted">Taxes calculated at checkout. Free Xpresspost over ${money(C.freeShippingThreshold)}.</p>
           <div class="buy-row">
             <div class="qty" aria-label="Quantity">
@@ -255,13 +258,14 @@
         const sub = cart.subtotal();
         const free = sub >= C.freeShippingThreshold || sub === 0;
         const ship = free ? 0 : C.flatShipping;
+        const off = discount(sub);
         if (!items.length) {
           $("#lines").innerHTML = `<p class="empty">Your cart is empty.<br><br><a class="btn" href="shop.html">Browse products</a></p>`;
         } else {
           $("#lines").innerHTML = items.map((i) => {
             const p = byId(i.id);
             return `<div class="cart-line">
-              <img src="assets/img/${p.img}" alt="">
+              <img src="${img(p)}" alt="">
               <div>
                 <a href="product.html?id=${p.id}" style="text-decoration:none;font-weight:600">${esc(p.name)}</a>
                 <div class="small muted">${esc(p.size)} · ${money(p.price)}</div>
@@ -284,9 +288,10 @@
           ${sub > 0 ? `<p class="small" style="margin:0">${left > 0 ? `You're <strong>${money(left)}</strong> away from free shipping` : "You've unlocked free shipping 🎉"}</p>
           <div class="progress"><i style="width:${Math.min(100, (sub / C.freeShippingThreshold) * 100)}%"></i></div>` : ""}
           <div class="line"><span>Subtotal</span><span>${money(sub)}</span></div>
+          ${off ? `<div class="line"><span>First-order discount (${C.firstOrderDiscount * 100}%)</span><span>−${money(off)}</span></div>` : ""}
           <div class="line"><span>Shipping (Xpresspost)</span><span>${sub === 0 ? "—" : ship === 0 ? "Free" : money(ship)}</span></div>
           <div class="line muted small"><span>GST/HST</span><span>Calculated by province</span></div>
-          <div class="line total"><span>Total</span><span>${money(sub + ship)} ${C.currency}</span></div>`;
+          <div class="line total"><span>Total</span><span>${money(sub - off + ship)} ${C.currency}</span></div>`;
         $("#checkout").hidden = !items.length;
       }
       document.addEventListener("click", (e) => {
@@ -295,6 +300,9 @@
         const r = e.target.closest("[data-rm]");
         if (r) { cart.setQty(r.dataset.rm, 0); draw(); }
       });
+      // ponytail: honour system, no accounts; check the email against past orders before shipping
+      const discount = (sub) => ($("#checkout").first.checked ? Math.round(sub * C.firstOrderDiscount * 100) / 100 : 0);
+      $("#checkout").first.addEventListener("change", draw);
       const wallet = () => {
         const pay = $("#checkout").pay.value, addr = (C.wallets || {})[pay];
         $("#wallet").hidden = !addr;
@@ -309,9 +317,10 @@
         const lines = items.map((i) => `${i.qty} x ${byId(i.id).name} ${byId(i.id).size} @ ${money(byId(i.id).price)}`);
         const sub = cart.subtotal();
         const ship = sub >= C.freeShippingThreshold ? 0 : C.flatShipping;
+        const off = discount(sub);
         const body = [
           "ORDER REQUEST", "", ...lines, "",
-          `Subtotal: ${money(sub)}`, `Shipping: ${ship ? money(ship) : "Free"}`, `Total before tax: ${money(sub + ship)} ${C.currency}`, "",
+          `Subtotal: ${money(sub)}`, ...(off ? [`First-order discount: -${money(off)}`] : []), `Shipping: ${ship ? money(ship) : "Free"}`, `Total before tax: ${money(sub - off + ship)} ${C.currency}`, "",
           `Name: ${f.get("name")}`, `Email: ${f.get("email")}`, `Address: ${f.get("address")}, ${f.get("city")}, ${f.get("province")} ${f.get("postal")}`,
           `Payment: ${f.get("pay")}${wallet() ? ` to ${wallet()}` : ""}`, "", "Purchaser confirms items are for laboratory research use only and that they are 18+."
         ].join("\n");
