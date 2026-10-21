@@ -103,6 +103,6 @@ window.NXT_PRODUCTS = [
     tagline: "ACTH(4-10) analogue",
     desc: "Semax is a synthetic heptapeptide derived from the ACTH(4-10) fragment. It is studied in research models for neurotrophic effects, including BDNF and NGF expression, and for neuroprotection in ischemia models." },
   { id: "bac-water", name: "Bacteriostatic Water", size: "3 mL", price: 0, cat: "supplies", cap: "#5aa9e6", img: "bac-water.jpg",
-    tagline: "Free with every delivery · 0.9% benzyl alcohol",
+    tagline: "Free with every delivery",
     desc: "Sterile water containing a small amount of preservative (typically 0.9% benzyl alcohol), supplied for multi-use laboratory reconstitution of lyophilized peptides in research settings." }
 ];
