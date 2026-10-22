@@ -310,6 +310,7 @@
         return addr;
       };
       $("#checkout").pay.addEventListener("change", wallet);
+      wallet();
       $("#checkout").addEventListener("submit", (e) => {
         e.preventDefault();
         const f = new FormData(e.target);
