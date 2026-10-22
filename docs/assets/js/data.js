@@ -14,8 +14,9 @@ window.NXT_CONFIG = {
   flatShipping: 15,               // TODO confirm (Canada Post Xpresspost)
   sameDayCutoff: "2 PM ET",       // TODO confirm
   ukLabName: "",                  // TODO name of the UK testing lab, e.g. "XYZ Analytical Ltd (UK)"
-  email: "orders@example.ca",     // TODO real address on own domain
-  phone: "",                      // TODO Canadian phone number
+  email: "nxtcanada@outlook.com",
+  phone: "+1 (780) 904-8085",
+  facebook: "https://www.facebook.com/profile.php?id=61595629042973",
   pricesArePlaceholders: false,
   domain: "nxtpeptides.ca",       // TODO the one official domain
   // TODO paste your receiving addresses. Empty = we email the address after the order.
