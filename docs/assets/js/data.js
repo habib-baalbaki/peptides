@@ -91,7 +91,7 @@ window.NXT_PRODUCTS = [
   { id: "ghk-cu-100", name: "GHK-Cu", size: "100 mg", price: 55, cat: "repair", cap: "#c0392b", img: "ghk-cu.jpg",
     tagline: "Copper-binding tripeptide",
     desc: "GHK-Cu is a naturally occurring copper-binding tripeptide studied extensively for skin regeneration, wound healing, collagen synthesis, and modulation of gene expression related to tissue repair and extracellular-matrix remodelling." },
-  { id: "retatrutide-40", name: "Retatrutide (RETA)", size: "40 mg", price: 170, cat: "metabolic", cap: "#5aa9e6", img: "retatrutide.jpg",
+  { id: "retatrutide-40", name: "Retatrutide (RETA)", size: "40 mg", price: 200, cat: "metabolic", cap: "#5aa9e6", img: "retatrutide.jpg",
     tagline: "GLP-1 / GIP / glucagon triple agonist",
     desc: "Retatrutide is a next-generation triple agonist of the GLP-1, GIP and glucagon receptors, researched for metabolic modulation. It is studied for effects on energy expenditure, glucose homeostasis and body-weight regulation in incretin-based research." },
   { id: "dsip", name: "DSIP", size: "5 mg", price: 60, cat: "neuro", cap: "#7b3fa0",
