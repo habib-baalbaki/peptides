@@ -25,8 +25,8 @@ window.NXT_CONFIG = {
   // TODO paste your receiving addresses. Empty = we email the address after the order.
   wallets: {
     BTC: "bc1qd5l8srh0v6vafaaxdha64chnt5s4w2fpejee0h",
-    USDT: "",                     // state the network too, e.g. "T... (TRC-20)"
-    ETH: ""                       // 0x...
+    USDT: "0x7f4251a19B90Ffef55DF510f254A6ae7Daf8B2Fa", // same BitPay ETH address, ERC-20 only (no TRC-20)
+    ETH: "0x7f4251a19B90Ffef55DF510f254A6ae7Daf8B2Fa"
   }
 };
 
