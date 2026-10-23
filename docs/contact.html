@@ -35,13 +35,14 @@
       <h3>Other ways to reach us</h3>
       <p class="muted">Email: <span id="c-email"></span></p>
       <p class="muted">Phone: <a id="c-phone"></a></p>
+      <p class="muted">WhatsApp: <a id="c-wa" target="_blank" rel="noopener noreferrer">Message us</a></p>
       <p class="muted">Facebook: <a id="c-facebook" target="_blank" rel="noopener noreferrer">NXT Peptides Canada</a></p>
       <p class="muted small">We can't answer questions about dosing or personal use. Our products are for laboratory research only.</p>
       <p class="muted small"><strong>Our only website is <span id="c-domain"></span>.</strong> We don't sell through other domains or social-media messages.</p>
     </div>
   </div>
 </section>
-<script>document.addEventListener("DOMContentLoaded",()=>{document.getElementById("c-email").textContent=NXT_CONFIG.email;document.getElementById("c-domain").textContent=NXT_CONFIG.domain;const phone=document.getElementById("c-phone");phone.textContent=NXT_CONFIG.phone;phone.href="tel:"+NXT_CONFIG.phone.replace(/[^+\d]/g,"");const facebook=document.getElementById("c-facebook");facebook.href=NXT_CONFIG.facebook;});</script>
+<script>document.addEventListener("DOMContentLoaded",()=>{document.getElementById("c-email").textContent=NXT_CONFIG.email;document.getElementById("c-domain").textContent=NXT_CONFIG.domain;const phone=document.getElementById("c-phone");phone.textContent=NXT_CONFIG.phone;phone.href="tel:"+NXT_CONFIG.phone.replace(/[^+\d]/g,"");const facebook=document.getElementById("c-facebook");facebook.href=NXT_CONFIG.facebook;document.getElementById("c-wa").href="https://wa.me/"+NXT_CONFIG.whatsapp;});</script>
 </main>
 <div id="site-footer"></div>
 <script src="assets/js/data.js"></script>

@@ -17,6 +17,7 @@ window.NXT_CONFIG = {
   email: "nxtcanada@outlook.com",
   phone: "+1 (780) 904-8085",
   facebook: "https://www.facebook.com/profile.php?id=61595629042973",
+  whatsapp: "17809048085",       // digits only, used for wa.me links
   pricesArePlaceholders: false,
   domain: "nxtpeptides.ca",       // TODO the one official domain
   // TODO paste your receiving addresses. Empty = we email the address after the order.
