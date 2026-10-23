@@ -12,6 +12,8 @@ window.NXT_CONFIG = {
   freeShippingThreshold: 300,
   firstOrderDiscount: 0.20,       // new customers, first order
   flatShipping: 15,               // TODO confirm (Canada Post Xpresspost)
+  // GST/HST by province (federal GST only where a separate PST/QST applies). ponytail: hard-coded, check yearly
+  taxRates: { AB: .05, BC: .05, MB: .05, NB: .15, NL: .15, NS: .14, NT: .05, NU: .05, ON: .13, PE: .15, QC: .05, SK: .05, YT: .05 },
   sameDayCutoff: "2 PM ET",       // TODO confirm
   ukLabName: "",                  // TODO name of the UK testing lab, e.g. "XYZ Analytical Ltd (UK)"
   email: "nxtcanada@outlook.com",

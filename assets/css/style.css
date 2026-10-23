@@ -214,3 +214,10 @@ footer.site { background: #fff; border-top: 1px solid var(--line); margin-top: 6
 .wa { position: fixed; right: 20px; bottom: 20px; width: 56px; height: 56px; border-radius: 50%; background: #25d366; display: grid; place-items: center; box-shadow: 0 4px 14px rgba(0,0,0,.25); z-index: 40; transition: transform .15s; }
 .wa:hover { transform: scale(1.08); }
 .wa svg { width: 30px; height: 30px; fill: #fff; }
+
+/* Crypto invoice */
+.inv-amt { font-size: 1.6rem; font-weight: 600; margin: 8px 0 2px; }
+.inv-qr svg { display: block; width: 220px; height: 220px; margin: 16px auto 0; }
+.inv-addr { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+.inv-addr code { flex: 1; min-width: 0; word-break: break-all; font-size: .8rem; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; }
+.inv-addr .btn { padding: 8px 14px; }

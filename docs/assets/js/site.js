@@ -255,10 +255,7 @@
     cart() {
       function draw() {
         const items = cart.items();
-        const sub = cart.subtotal();
-        const free = sub >= C.freeShippingThreshold || sub === 0;
-        const ship = free ? 0 : C.flatShipping;
-        const off = discount(sub);
+        const t = totals(), { sub, off, ship } = t;
         if (!items.length) {
           $("#lines").innerHTML = `<p class="empty">Your cart is empty.<br><br><a class="btn" href="shop.html">Browse products</a></p>`;
         } else {
@@ -290,8 +287,9 @@
           <div class="line"><span>Subtotal</span><span>${money(sub)}</span></div>
           ${off ? `<div class="line"><span>First-order discount (${C.firstOrderDiscount * 100}%)</span><span>−${money(off)}</span></div>` : ""}
           <div class="line"><span>Shipping (Xpresspost)</span><span>${sub === 0 ? "—" : ship === 0 ? "Free" : money(ship)}</span></div>
-          <div class="line muted small"><span>GST/HST</span><span>Calculated by province</span></div>
-          <div class="line total"><span>Total</span><span>${money(sub - off + ship)} ${C.currency}</span></div>`;
+          ${t.rate ? `<div class="line"><span>GST/HST (${t.prov} ${+(t.rate * 100).toFixed(3)}%)</span><span>${money(t.tax)}</span></div>`
+            : `<div class="line muted small"><span>GST/HST</span><span>Select your province</span></div>`}
+          <div class="line total"><span>Total</span><span>${money(t.total)} ${C.currency}</span></div>`;
         $("#checkout").hidden = !items.length;
       }
       document.addEventListener("click", (e) => {
@@ -299,35 +297,66 @@
         if (q) { const it = cart.items().find((i) => i.id === q.dataset.q); cart.setQty(q.dataset.q, it.qty + +q.dataset.d); draw(); }
         const r = e.target.closest("[data-rm]");
         if (r) { cart.setQty(r.dataset.rm, 0); draw(); }
+        const c = e.target.closest("[data-copy]");
+        if (c) navigator.clipboard.writeText(c.dataset.copy).then(() => toast("Address copied"));
       });
       // ponytail: honour system, no accounts; check the email against past orders before shipping
       const discount = (sub) => ($("#checkout").first.checked ? Math.round(sub * C.firstOrderDiscount * 100) / 100 : 0);
-      $("#checkout").first.addEventListener("change", draw);
-      const wallet = () => {
-        const pay = $("#checkout").pay.value, addr = (C.wallets || {})[pay];
-        $("#wallet").hidden = !addr;
-        $("#wallet").innerHTML = addr ? `Send the order total in ${esc(pay)} to:<br><strong>${esc(addr)}</strong><br>Your order ships once the payment confirms.` : "";
-        return addr;
+      const totals = () => {
+        const sub = cart.subtotal(), off = discount(sub);
+        const ship = sub >= C.freeShippingThreshold || sub === 0 ? 0 : C.flatShipping;
+        const prov = $("#checkout").province.value, rate = C.taxRates[prov];
+        const tax = rate ? Math.round((sub - off + ship) * rate * 100) / 100 : 0;
+        return { sub, off, ship, prov, rate, tax, total: sub - off + ship + tax };
       };
-      $("#checkout").pay.addEventListener("change", wallet);
-      wallet();
-      $("#checkout").addEventListener("submit", (e) => {
+      $("#checkout").first.addEventListener("change", draw);
+      $("#checkout").province.addEventListener("change", draw);
+      const COINS = { BTC: ["bitcoin", 8], ETH: ["ethereum", 6], USDT: ["tether", 2] };
+      const qr = (s) => { const q = qrcode(0, "M"); q.addData(s); q.make(); return q.createSvgTag({ cellSize: 5, margin: 2 }); };
+      $("#checkout").addEventListener("submit", async (e) => {
         e.preventDefault();
-        const f = new FormData(e.target);
+        e.target.querySelector("[type=submit]").disabled = true;
+        const f = new FormData(e.target), t = totals(), coin = f.get("pay"), addr = (C.wallets || {})[coin];
+        const [cg, dp] = COINS[coin];
+        const order = "NXT-" + Date.now().toString(36).toUpperCase();
+        let amt = "";
+        try {
+          const r = await (await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cg}&vs_currencies=cad`)).json();
+          amt = (t.total / r[cg].cad).toFixed(dp);
+        } catch (err) {} // no live rate: we email the exact amount instead
         const items = cart.items();
         const lines = items.map((i) => `${i.qty} x ${byId(i.id).name} ${byId(i.id).size} @ ${money(byId(i.id).price)}`);
-        const sub = cart.subtotal();
-        const ship = sub >= C.freeShippingThreshold ? 0 : C.flatShipping;
-        const off = discount(sub);
         const body = [
-          "ORDER REQUEST", "", ...lines, "",
-          `Subtotal: ${money(sub)}`, ...(off ? [`First-order discount: -${money(off)}`] : []), `Shipping: ${ship ? money(ship) : "Free"}`, `Total before tax: ${money(sub - off + ship)} ${C.currency}`, "",
+          `ORDER ${order}`, "", ...lines, "",
+          `Subtotal: ${money(t.sub)}`, ...(t.off ? [`First-order discount: -${money(t.off)}`] : []), `Shipping: ${t.ship ? money(t.ship) : "Free"}`, `GST/HST (${t.prov}): ${money(t.tax)}`, `Total: ${money(t.total)} ${C.currency}`, "",
           `Name: ${f.get("name")}`, `Email: ${f.get("email")}`, `Address: ${f.get("address")}, ${f.get("city")}, ${f.get("province")} ${f.get("postal")}`,
-          `Payment: ${f.get("pay")}${wallet() ? ` to ${wallet()}` : ""}`, "", "Purchaser confirms items are for laboratory research use only and that they are 18+."
+          `Payment: ${amt ? `${amt} ${coin}` : coin}${addr ? ` to ${addr}` : ""}`, "", "Purchaser confirms items are for laboratory research use only and that they are 18+."
         ].join("\n");
-        // TODO replace with a real checkout (WooCommerce/Shopify/Stripe-compatible processor) before launch.
-        location.href = `mailto:${C.email}?subject=${encodeURIComponent("Order request – NXT Peptides Canada")}&body=${encodeURIComponent(body)}`;
-        $("#done").hidden = false;
+        const mail = `mailto:${C.email}?subject=${encodeURIComponent(`Order ${order} – NXT Peptides Canada`)}&body=${encodeURIComponent(body)}`;
+        // ponytail: one fixed address per coin, payments matched to orders by amount; BTCPay Server gives per-order addresses + auto-confirm
+        const uri = coin === "BTC" && amt ? `bitcoin:${addr}?amount=${amt}` : addr;
+        $(".summary").innerHTML = `
+          <h3>Pay with ${coin}</h3>
+          <p class="small muted" style="margin:0">Order ${order}</p>
+          ${amt ? `<p class="inv-amt">${amt} ${coin}</p><p class="small muted" style="margin:0">= ${money(t.total)} ${C.currency} · rate held for <strong id="inv-timer">30:00</strong></p>`
+            : `<p class="inv-amt">${money(t.total)} ${C.currency}</p><p class="small muted" style="margin:0">We'll email you the exact ${coin} amount.</p>`}
+          ${addr ? `${typeof qrcode === "function" ? `<div class="inv-qr">${qr(uri)}</div>` : ""}
+            <p class="small muted" style="margin:12px 0 4px">Send to this address${coin === "USDT" ? " (Ethereum network, ERC-20 only)" : ""}</p>
+            <div class="inv-addr"><code>${esc(addr)}</code><button class="btn ghost" type="button" data-copy="${esc(addr)}">Copy</button></div>`
+            : `<p class="small">We'll email you the ${coin} wallet address.</p>`}
+          <p class="small">Send the exact amount shown. Your order ships once the payment confirms. Your email app opened with your order details — please send that email.</p>
+          <a class="btn ghost block" href="${mail}">Email my order again</a>`;
+        $("#lines").innerHTML = `<p class="empty">Thanks! Order <strong>${order}</strong> is waiting for payment.</p>`;
+        cart.save([]);
+        if (amt) {
+          const end = Date.now() + 30 * 60e3;
+          const tick = setInterval(() => {
+            const s = Math.max(0, Math.round((end - Date.now()) / 1000));
+            $("#inv-timer").textContent = s ? `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}` : "expired, message us for an updated amount";
+            if (!s) clearInterval(tick);
+          }, 1000);
+        }
+        location.href = mail;
       });
       draw();
     },
