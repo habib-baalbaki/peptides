@@ -21,7 +21,7 @@ window.NXT_CONFIG = {
   domain: "nxtpeptides.ca",       // TODO the one official domain
   // TODO paste your receiving addresses. Empty = we email the address after the order.
   wallets: {
-    BTC: "",                      // bc1...
+    BTC: "bc1qd5l8srh0v6vafaaxdha64chnt5s4w2fpejee0h",
     USDT: "",                     // state the network too, e.g. "T... (TRC-20)"
     ETH: ""                       // 0x...
   }
