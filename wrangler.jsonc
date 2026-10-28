@@ -1,0 +1,6 @@
+// Cloudflare Workers: serve the static site in docs/
+{
+  "name": "peptides",
+  "compatibility_date": "2025-10-01",
+  "assets": { "directory": "./docs" }
+}
