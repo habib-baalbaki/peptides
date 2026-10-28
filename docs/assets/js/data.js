@@ -21,8 +21,7 @@ window.NXT_CONFIG = {
   facebook: "https://www.facebook.com/profile.php?id=61595629042973",
   whatsapp: "17809048085",       // digits only, used for wa.me links
   pricesArePlaceholders: false,
-  domain: "nxtpeptides.ca",       // TODO the one official domain
-  // TODO paste your receiving addresses. Empty = we email the address after the order.
+  domain: "nxtcanada.ca",
   wallets: {
     BTC: "bc1qd5l8srh0v6vafaaxdha64chnt5s4w2fpejee0h",
     USDT: "0x7f4251a19B90Ffef55DF510f254A6ae7Daf8B2Fa", // same BitPay ETH address, ERC-20 only (no TRC-20)
