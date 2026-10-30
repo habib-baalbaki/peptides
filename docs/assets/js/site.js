@@ -12,6 +12,8 @@
   const price = (p) => p.price ? `${money(p.price)} <small>${C.currency}</small>` : "FREE";
   const img = (p) => `assets/img/${p.img || "vial.svg"}`;
   const byId = (id) => P.find((p) => p.id === id);
+  const coaUrl = (p) => C.coas[p.id] && `https://verify.janoshik.com/tests/${C.coas[p.id]}`;
+  const qr = (s) => { const q = qrcode(0, "M"); q.addData(s); q.make(); return q.createSvgTag({ cellSize: 5, margin: 2 }); };
   const catName = (id) => (CATS.find((c) => c.id === id) || {}).name || "";
   const page = document.body.dataset.page;
 
@@ -61,7 +63,7 @@
   /* ---------- layout ---------- */
   const NAV = [
     ["shop.html", "Shop", "shop"],
-    ["lab-results.html", "UK Lab Results", "lab"],
+    ["lab-results.html", "Lab Results", "lab"],
     ["about.html", "About", "about"],
     ["faq.html", "FAQ", "faq"],
     ["contact.html", "Contact", "contact"]
@@ -74,7 +76,7 @@
         <span>New customers: ${C.firstOrderDiscount * 100}% off your first order</span>
         <span>Free shipping over ${money(C.freeShippingThreshold)} ${C.currency}</span>
         <span>Free 3 mL BAC water with every delivery</span>
-        <span>UK-tested &amp; validated</span>
+        <span>UK-made &amp; lab-tested</span>
       </div>
       ${C.pricesArePlaceholders ? '<div class="placeholder-bar">Preview build: prices, shipping terms and lab details are placeholders until confirmed.</div>' : ""}
       <header class="site">
@@ -102,7 +104,7 @@
             </div>
             <div><h4>Company</h4>
               <a href="about.html">About NXT Canada</a>
-              <a href="lab-results.html">UK Lab Results</a>
+              <a href="lab-results.html">Lab Results</a>
               <a href="faq.html">FAQ</a>
               <a href="contact.html">Contact</a>
             </div>
@@ -115,7 +117,7 @@
           </div>
           <div class="foot-legal">
             <p><strong>For laboratory research use only.</strong> Products are not for human or veterinary use, and not intended to diagnose, treat, cure or prevent any disease. Products have not been authorized by Health Canada. We do not provide dosing, usage or medical advice. Purchasers must be 18+.</p>
-            <p>Products are manufactured in a GMP-compliant facility and independently tested in the UK. NXT Peptides Canada is a Canadian-based company. © ${new Date().getFullYear()} NXT Peptides Canada.</p>
+            <p>Products are manufactured in a GMP-compliant facility and independently tested by Janoshik Analytical. NXT Peptides Canada is a Canadian-based company. © ${new Date().getFullYear()} NXT Peptides Canada.</p>
           </div>
         </div>
       </footer>`;
@@ -229,15 +231,21 @@
           <table class="specs">
             <tr><th>Contents</th><td>${esc(p.size)}${p.cat === "supplies" ? "" : ", lyophilized powder"}</td></tr>
             <tr><th>Purity</th><td>≥99% (HPLC), see batch COA</td></tr>
-            <tr><th>Testing</th><td>Independently tested &amp; validated in the UK (HPLC + MS)</td></tr>
-            <tr><th>Manufacturing</th><td>GMP-compliant facility</td></tr>
+            <tr><th>Testing</th><td>Independently tested by Janoshik Analytical (HPLC + MS)</td></tr>
+            <tr><th>Manufacturing</th><td>NX-T, United Kingdom</td></tr>
             <tr><th>Storage</th><td>Store lyophilized vials refrigerated (2–8 °C), away from light</td></tr>
             <tr><th>Ships from</th><td>Canada, via Canada Post Xpresspost with tracking</td></tr>
           </table>
           <div class="coa-box">
-            <div class="row"><strong>Certificate of Analysis</strong><span class="pill">Batch COA pending upload</span></div>
+            <div class="row"><strong>Certificate of Analysis</strong>${coaUrl(p) ? `<a class="btn ghost" href="${coaUrl(p)}" target="_blank" rel="noopener noreferrer">View lab results</a>` : '<span class="pill">Batch COA pending upload</span>'}</div>
+            ${coaUrl(p) && typeof qrcode === "function" ? `<a class="coa-qr" href="${coaUrl(p)}" target="_blank" rel="noopener noreferrer" aria-label="Lab results verification for ${esc(p.name)}">${qr(coaUrl(p))}</a>
+            <p class="small muted" style="margin:0;text-align:center">Scan to open the lab's verification and PDF certificate</p>` : ""}
             <p class="small muted" style="margin:8px 0 0">Tested by: ${esc(lab)}. Lot number on the vial matches the COA. <a class="link" href="lab-results.html">All lab results</a></p>
           </div>
+          ${p.cat === "supplies" ? "" : `<div class="coa-box">
+            <strong>Authentic NXT: scan the QR code on your vial</strong>
+            <p class="small muted" style="margin:8px 0 0">Every NXT vial carries a QR code that verifies it came from us. ${esc(C.domain)} is the only official NXT store and the sole authorized supplier in Canada. Beware of fraudulent products sold anywhere else.</p>
+          </div>`}
           <p class="ruo">For laboratory research use only. Not for human or veterinary use. Not authorized by Health Canada. We do not provide dosing or usage guidance.</p>
         </div>`;
       const qty = $("#qty");
@@ -312,7 +320,6 @@
       $("#checkout").first.addEventListener("change", draw);
       $("#checkout").province.addEventListener("change", draw);
       const COINS = { BTC: ["bitcoin", 8], ETH: ["ethereum", 6], USDT: ["tether", 2] };
-      const qr = (s) => { const q = qrcode(0, "M"); q.addData(s); q.make(); return q.createSvgTag({ cellSize: 5, margin: 2 }); };
       $("#checkout").addEventListener("submit", async (e) => {
         e.preventDefault();
         e.target.querySelector("[type=submit]").disabled = true;
@@ -371,7 +378,7 @@
           <td class="muted">—</td>
           <td class="muted">—</td>
           <td>${esc(lab)}</td>
-          <td><span class="pill">Pending upload</span></td>
+          <td>${coaUrl(p) ? `<a href="${coaUrl(p)}" target="_blank" rel="noopener noreferrer">View report</a>` : `<span class="pill">Pending upload</span>`}</td>
         </tr>`).join("");
     }
   };

@@ -7,7 +7,7 @@
  */
 window.NXT_CONFIG = {
   brand: "NXT Peptides Canada",
-  tagline: "Canadian-based · UK-tested & validated · Bringing NXT to Canada",
+  tagline: "Canadian-based · UK-made & lab-tested · Bringing NXT to Canada",
   currency: "CAD",
   freeShippingThreshold: 300,
   firstOrderDiscount: 0.20,       // new customers, first order
@@ -15,7 +15,23 @@ window.NXT_CONFIG = {
   // GST/HST by province (federal GST only where a separate PST/QST applies). ponytail: hard-coded, check yearly
   taxRates: { AB: .05, BC: .05, MB: .05, NB: .15, NL: .15, NS: .14, NT: .05, NU: .05, ON: .13, PE: .15, QC: .05, SK: .05, YT: .05 },
   sameDayCutoff: "2 PM ET",       // TODO confirm
-  ukLabName: "",                  // TODO name of the UK testing lab, e.g. "XYZ Analytical Ltd (UK)"
+  ukLabName: "Janoshik Analytical",  // independent third-party lab (NX-T is the UK manufacturer)
+  // Janoshik test reports per product id, from trade.nx-t.co.uk/coas
+  coas: {
+    "glow": "136712-GLOW_1ZQG6ZWA5UEH",
+    "bpc157": "136713-BPC157_85EDG3RL7MEU",
+    "cjc1295-ipamorelin": "136714-CJC1295_mod_GRF_129_8FXZ38JBFWFK",
+    "klow": "136715-KLOW_96UU1FQXN2S8",
+    "kisspeptin10": "136716-Kisspeptin_5YA55QZPY87T",
+    "ghk-cu": "136717-GHKCu_RCUYULJZZI58",
+    "ghk-cu-100": "136717-GHKCu_RCUYULJZZI58",
+    "ipamorelin": "136718-Ipamorelin_9VDHPE9D39FU",
+    "pt141": "136719-PT141_JMCKIBSD38YA",
+    "retatrutide": "136720-Retatrutide_9PLI3D2KELV2",
+    "retatrutide-40": "136720-Retatrutide_9PLI3D2KELV2",
+    "tb500": "136721-TB500_TB4_ID7GYJJVCYKW",
+    "ghrp6": "136722-GHRP6_73F4WZEYBUCV"
+  },
   email: "nxtcanada@outlook.com",
   phone: "+1 (780) 904-8085",
   facebook: "https://www.facebook.com/profile.php?id=61595629042973",

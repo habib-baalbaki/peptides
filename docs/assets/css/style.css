@@ -142,7 +142,9 @@ select.sort { border: 1px solid var(--line); border-radius: 999px; padding: 8px 
 .specs th, .specs td { text-align: left; padding: 10px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
 .specs th { width: 40%; font-weight: 500; color: var(--muted); }
 .coa-box { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; margin-top: 16px; }
-.coa-box .row { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.coa-box .row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.coa-box .btn { padding: 8px 14px; }
+.coa-qr svg { display: block; width: 160px; height: 160px; margin: 14px auto 6px; background: #fff; }
 .ruo { font-size: .8rem; color: var(--muted); border-left: 3px solid var(--line); padding-left: 12px; margin-top: 18px; }
 .crumbs { font-size: .85rem; color: var(--muted); padding-top: 24px; }
 .crumbs a { text-decoration: none; }
