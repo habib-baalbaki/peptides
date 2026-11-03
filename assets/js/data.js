@@ -102,7 +102,7 @@ window.NXT_PRODUCTS = [
   { id: "selank", name: "Selank", size: "10 mg", price: 60, cat: "neuro", cap: "#c46a9c",
     tagline: "Synthetic tuftsin analogue",
     desc: "Selank is a synthetic heptapeptide analogue of the immunomodulatory peptide tuftsin. It is investigated in preclinical research for anxiolytic-like activity, modulation of GABAergic signalling and effects on BDNF expression." },
-  { id: "semax", name: "Semax", size: "10 mg", price: 30, cat: "neuro", cap: "#3d7fbf",
+  { id: "semax", name: "Semax", size: "10 mg", price: 50, cat: "neuro", cap: "#3d7fbf",
     tagline: "ACTH(4-10) analogue",
     desc: "Semax is a synthetic heptapeptide derived from the ACTH(4-10) fragment. It is studied in research models for neurotrophic effects, including BDNF and NGF expression, and for neuroprotection in ischemia models." },
   { id: "bac-water", name: "Bacteriostatic Water", size: "3 mL", price: 0, cat: "supplies", cap: "#5aa9e6", img: "bac-water.jpg",
