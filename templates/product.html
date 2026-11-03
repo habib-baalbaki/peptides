@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<meta name="description" content="{{DESCRIPTION}}">
+<!-- nxt:head --><!-- /nxt:head -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ROOT}}assets/css/style.css">
+</head>
+<body data-page="product" data-root="{{ROOT}}" data-id="{{ID}}">
+<!--
+  Product page template. scripts/build.mjs generates products/<id>.html from this file
+  for every product in assets/js/data.js. Edit this template, not the generated pages.
+-->
+<div id="site-header"><!-- nxt:header --><!-- /nxt:header --></div>
+<main>
+
+<div class="container">
+  <p class="crumbs"><a href="{{ROOT}}index.html">Home</a> / <a href="{{ROOT}}shop.html">Shop</a> / <span id="crumb"><!-- nxt:crumb --><!-- /nxt:crumb --></span></p>
+  <section class="pdp" id="pdp"><!-- nxt:pdp --><!-- /nxt:pdp --></section>
+  <div class="section-head"><h2>You may also need</h2></div>
+  <div class="grid" id="related"><!-- nxt:related --><!-- /nxt:related --></div>
+</div>
+</main>
+<div id="site-footer"><!-- nxt:footer --><!-- /nxt:footer --></div>
+<script src="{{ROOT}}assets/js/data.js"></script>
+<script src="{{ROOT}}assets/js/render.js"></script>
+<script src="{{ROOT}}assets/js/site.js"></script>
+</body>
+</html>

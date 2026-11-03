@@ -1,19 +1,24 @@
-/* Shared layout, cart and page renderers. Static, no build step. */
+/*
+ * Shared layout, cart and page behaviour.
+ * Markup templates live in render.js. scripts/build.mjs pre-renders the header,
+ * footer, grids and product pages into the HTML; this file only fills in what
+ * is missing and wires up behaviour.
+ */
 (function () {
   const C = window.NXT_CONFIG;
   const P = window.NXT_PRODUCTS;
-  const CATS = window.NXT_CATEGORIES;
+  const R = window.NXT_RENDER;
   const CART_KEY = "nxt_cart_v1";
   const GATE_KEY = "nxt_age_ok_v1";
 
   const $ = (s, r = document) => r.querySelector(s);
-  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const money = (n) => "$" + n.toFixed(2);
-  const price = (p) => p.price ? `${money(p.price)} <small>${C.currency}</small>` : "FREE";
-  const img = (p) => `assets/img/${p.img || "vial.svg"}`;
-  const byId = (id) => P.find((p) => p.id === id);
-  const catName = (id) => (CATS.find((c) => c.id === id) || {}).name || "";
+  const { esc, money, byId } = R;
   const page = document.body.dataset.page;
+  const ROOT = document.body.dataset.root || ""; // "../" on products/*.html
+  const img = (p) => R.imgSrc(p, ROOT);
+  const cards = (list) => R.cards(list, ROOT);
+  /* fill an element from a template unless the build already pre-rendered it */
+  const fill = (el, html) => { if (el && !el.children.length) el.innerHTML = html; };
 
   /* storage: wrapped, since private mode can throw */
   const store = {
@@ -59,66 +64,15 @@
   }
 
   /* ---------- layout ---------- */
-  const NAV = [
-    ["shop.html", "Shop", "shop"],
-    ["lab-results.html", "UK Lab Results", "lab"],
-    ["about.html", "About", "about"],
-    ["faq.html", "FAQ", "faq"],
-    ["contact.html", "Contact", "contact"]
-  ];
-
-  function header() {
-    const links = NAV.map(([h, t, k]) => `<a href="${h}"${k === page ? ' aria-current="page"' : ""}>${t}</a>`).join("");
-    return `
-      <div class="announce">
-        <span>New customers: ${C.firstOrderDiscount * 100}% off your first order</span>
-        <span>Free shipping over ${money(C.freeShippingThreshold)} ${C.currency}</span>
-        <span>Free 3 mL BAC water with every delivery</span>
-        <span>UK-tested &amp; validated</span>
-      </div>
-      ${C.pricesArePlaceholders ? '<div class="placeholder-bar">Preview build: prices, shipping terms and lab details are placeholders until confirmed.</div>' : ""}
-      <header class="site">
-        <div class="container nav">
-          <a class="logo" href="index.html" aria-label="NXT Peptides Canada home">NX/T <small>Canada</small></a>
-          <button class="menu-btn" aria-label="Menu" aria-expanded="false">☰</button>
-          <nav class="nav-links" aria-label="Main">${links}</nav>
-          <a class="cart-link" href="cart.html" aria-label="Cart">Cart <span class="cart-count" id="cart-count">0</span></a>
-        </div>
-      </header>`;
-  }
-
-  function footer() {
-    return `
-      <footer class="site">
-        <div class="container">
-          <div class="foot-grid">
-            <div>
-              <a class="logo" href="index.html">NX/T <small>Canada</small></a>
-              <p class="muted small" style="margin-top:10px">${esc(C.tagline)}.<br>${esc(C.domain)} is our only website.</p>
-            </div>
-            <div><h4>Shop</h4>
-              <a href="shop.html">All products</a>
-              ${CATS.slice(0, 4).map((c) => `<a href="shop.html?cat=${c.id}">${esc(c.name)}</a>`).join("")}
-            </div>
-            <div><h4>Company</h4>
-              <a href="about.html">About NXT Canada</a>
-              <a href="lab-results.html">UK Lab Results</a>
-              <a href="faq.html">FAQ</a>
-              <a href="contact.html">Contact</a>
-            </div>
-            <div><h4>Policies</h4>
-              <a href="policies.html#shipping">Shipping</a>
-              <a href="policies.html#returns">Returns</a>
-              <a href="policies.html#terms">Terms of sale</a>
-              <a href="policies.html#privacy">Privacy</a>
-            </div>
-          </div>
-          <div class="foot-legal">
-            <p><strong>For laboratory research use only.</strong> Products are not for human or veterinary use, and not intended to diagnose, treat, cure or prevent any disease. Products have not been authorized by Health Canada. We do not provide dosing, usage or medical advice. Purchasers must be 18+.</p>
-            <p>Products are manufactured in a GMP-compliant facility and independently tested in the UK. NXT Peptides Canada is a Canadian-based company. © ${new Date().getFullYear()} NXT Peptides Canada.</p>
-          </div>
-        </div>
-      </footer>`;
+  function layout() {
+    const head = $("#site-header");
+    fill(head, R.header(page, ROOT));
+    // pre-rendered header: make sure the current page is marked
+    head.querySelectorAll(".nav-links a[data-nav]").forEach((a) => {
+      if (a.dataset.nav === page) a.setAttribute("aria-current", "page");
+      else a.removeAttribute("aria-current");
+    });
+    fill($("#site-footer"), R.footer(ROOT));
   }
 
   function ageGate() {
@@ -142,25 +96,6 @@
     $("#gate-yes").addEventListener("click", () => { store.set(GATE_KEY, true); g.remove(); });
   }
 
-  /* ---------- shared pieces ---------- */
-  function card(p) {
-    return `
-      <article class="card">
-        <a class="card-img" href="product.html?id=${p.id}">
-          ${p.best ? '<span class="badge">Best seller</span>' : ""}
-          <img src="${img(p)}" alt="${esc(p.name)} ${esc(p.size)} vial" loading="lazy" width="440" height="550">
-        </a>
-        <div class="card-body">
-          <a class="title" href="product.html?id=${p.id}"><span class="cap-dot" style="background:${p.cap}"></span>${esc(p.name)}</a>
-          <span class="tag">${esc(p.size)} · ${esc(p.tagline)}</span>
-          <div class="card-foot">
-            <span class="price">${price(p)}</span>
-            <button class="add-btn" data-add="${p.id}" aria-label="Add ${esc(p.name)} to cart">Add</button>
-          </div>
-        </div>
-      </article>`;
-  }
-
   document.addEventListener("click", (e) => {
     const b = e.target.closest("[data-add]");
     if (b) cart.add(b.dataset.add, 1);
@@ -169,19 +104,15 @@
   /* ---------- pages ---------- */
   const pages = {
     home() {
-      $("#best").innerHTML = P.filter((p) => p.best).map(card).join("");
-      $("#cats").innerHTML = CATS.map((c) => {
-        const n = P.filter((p) => p.cat === c.id).length;
-        return `<a class="cat" href="shop.html?cat=${c.id}"><b>${esc(c.name)}</b><em>${n}</em></a>`;
-      }).join("");
-      $("#all-count").textContent = `Shop all ${P.length} products`;
+      fill($("#best"), cards(P.filter((p) => p.best)));
+      fill($("#cats"), R.catTiles(ROOT));
+      $("#all-count").textContent = R.allCount();
     },
 
     shop() {
       const params = new URLSearchParams(location.search);
       const state = { cat: params.get("cat") || "all", q: "", sort: "featured" };
-      const chips = [{ id: "all", name: "All" }, ...CATS];
-      $("#chips").innerHTML = chips.map((c) => `<button class="chip" data-cat="${c.id}">${esc(c.name)}</button>`).join("");
+      fill($("#chips"), R.chips());
 
       function draw() {
         document.querySelectorAll(".chip").forEach((b) => b.setAttribute("aria-pressed", b.dataset.cat === state.cat));
@@ -191,8 +122,8 @@
         if (state.sort === "price-asc") list = [...list].sort((a, b) => a.price - b.price);
         if (state.sort === "price-desc") list = [...list].sort((a, b) => b.price - a.price);
         if (state.sort === "name") list = [...list].sort((a, b) => a.name.localeCompare(b.name));
-        $("#grid").innerHTML = list.length ? list.map(card).join("") : '<p class="empty">No products match. Try another search.</p>';
-        $("#result-count").textContent = `${list.length} product${list.length === 1 ? "" : "s"}`;
+        $("#grid").innerHTML = list.length ? cards(list) : '<p class="empty">No products match. Try another search.</p>';
+        $("#result-count").textContent = R.resultCount(list.length);
       }
       $("#chips").addEventListener("click", (e) => {
         const b = e.target.closest(".chip"); if (!b) return;
@@ -205,51 +136,18 @@
       draw();
     },
 
+    /* products/<id>.html: content is pre-rendered by the build, this only wires it up */
     product() {
-      const p = byId(new URLSearchParams(location.search).get("id")) || P[0];
-      document.title = `${p.name} ${p.size} | NXT Peptides Canada`;
-      const lab = C.ukLabName || "Independent UK laboratory (name to be confirmed)";
-      $("#pdp").innerHTML = `
-        <div class="pdp-img"><img src="${img(p)}" alt="${esc(p.name)} ${esc(p.size)} vial" width="440" height="550" style="width:100%"></div>
-        <div>
-          <p class="eyebrow">${esc(catName(p.cat))}</p>
-          <h1>${esc(p.name)} <span class="muted" style="font-weight:300">${esc(p.size)}</span></h1>
-          <p class="tagline">${esc(p.tagline)}</p>
-          <div class="big-price">${p.price ? `${money(p.price)} <small class="muted" style="font-size:.9rem;font-weight:400">${C.currency}</small>` : "FREE"}</div>
-          <p class="small muted">Taxes calculated at checkout. Free Xpresspost over ${money(C.freeShippingThreshold)}.</p>
-          <div class="buy-row">
-            <div class="qty" aria-label="Quantity">
-              <button type="button" data-step="-1" aria-label="Decrease">−</button>
-              <input id="qty" type="number" min="1" max="99" value="1" aria-label="Quantity">
-              <button type="button" data-step="1" aria-label="Increase">+</button>
-            </div>
-            <button class="btn" id="add">Add to cart</button>
-          </div>
-          <p>${esc(p.desc)}</p>
-          <table class="specs">
-            <tr><th>Contents</th><td>${esc(p.size)}${p.cat === "supplies" ? "" : ", lyophilized powder"}</td></tr>
-            <tr><th>Purity</th><td>≥99% (HPLC), see batch COA</td></tr>
-            <tr><th>Testing</th><td>Independently tested &amp; validated in the UK (HPLC + MS)</td></tr>
-            <tr><th>Manufacturing</th><td>GMP-compliant facility</td></tr>
-            <tr><th>Storage</th><td>Store lyophilized vials refrigerated (2–8 °C), away from light</td></tr>
-            <tr><th>Ships from</th><td>Canada, via Canada Post Xpresspost with tracking</td></tr>
-          </table>
-          <div class="coa-box">
-            <div class="row"><strong>Certificate of Analysis</strong><span class="pill">Batch COA pending upload</span></div>
-            <p class="small muted" style="margin:8px 0 0">Tested by: ${esc(lab)}. Lot number on the vial matches the COA. <a class="link" href="lab-results.html">All lab results</a></p>
-          </div>
-          <p class="ruo">For laboratory research use only. Not for human or veterinary use. Not authorized by Health Canada. We do not provide dosing or usage guidance.</p>
-        </div>`;
+      const p = byId(document.body.dataset.id);
+      if (!p) return;
+      fill($("#pdp"), R.pdp(p, ROOT));
+      fill($("#related"), cards(R.related(p)));
       const qty = $("#qty");
       $("#pdp").addEventListener("click", (e) => {
         const s = e.target.closest("[data-step]");
         if (s) qty.value = Math.max(1, Math.min(99, (+qty.value || 1) + +s.dataset.step));
       });
       $("#add").addEventListener("click", () => cart.add(p.id, Math.max(1, Math.min(99, +qty.value || 1))));
-      $("#crumb").textContent = p.name;
-      const related = P.filter((x) => x.cat === p.cat && x.id !== p.id).slice(0, 4);
-      const extra = P.filter((x) => x.id === "bac-water" && x.id !== p.id);
-      $("#related").innerHTML = [...related, ...extra].slice(0, 4).map(card).join("");
     },
 
     cart() {
@@ -257,14 +155,14 @@
         const items = cart.items();
         const t = totals(), { sub, off, ship } = t;
         if (!items.length) {
-          $("#lines").innerHTML = `<p class="empty">Your cart is empty.<br><br><a class="btn" href="shop.html">Browse products</a></p>`;
+          $("#lines").innerHTML = `<p class="empty">Your cart is empty.<br><br><a class="btn" href="${ROOT}shop.html">Browse products</a></p>`;
         } else {
           $("#lines").innerHTML = items.map((i) => {
             const p = byId(i.id);
             return `<div class="cart-line">
               <img src="${img(p)}" alt="">
               <div>
-                <a href="product.html?id=${p.id}" style="text-decoration:none;font-weight:600">${esc(p.name)}</a>
+                <a href="${R.productHref(p, ROOT)}" style="text-decoration:none;font-weight:600">${esc(p.name)}</a>
                 <div class="small muted">${esc(p.size)} · ${money(p.price)}</div>
                 <div class="qty" style="margin-top:8px">
                   <button data-q="${p.id}" data-d="-1" aria-label="Decrease">−</button>
@@ -362,23 +260,13 @@
     },
 
     lab() {
-      const lab = C.ukLabName || "UK laboratory (to be confirmed)";
-      $("#lab-name").textContent = lab;
-      $("#coa-rows").innerHTML = P.filter((p) => p.cat !== "supplies").map((p) => `
-        <tr>
-          <td><a href="product.html?id=${p.id}" style="text-decoration:none;font-weight:500">${esc(p.name)}</a></td>
-          <td>${esc(p.size)}</td>
-          <td class="muted">—</td>
-          <td class="muted">—</td>
-          <td>${esc(lab)}</td>
-          <td><span class="pill">Pending upload</span></td>
-        </tr>`).join("");
+      $("#lab-name").textContent = R.labName();
+      fill($("#coa-rows"), R.coaRows(ROOT));
     }
   };
 
   /* ---------- boot ---------- */
-  $("#site-header").innerHTML = header();
-  $("#site-footer").innerHTML = footer();
+  layout();
   if (C.whatsapp) document.body.insertAdjacentHTML("beforeend", `<a class="wa" href="https://wa.me/${C.whatsapp}?text=${encodeURIComponent("Hi NXT Canada, I have a question.")}" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg></a>`);
   const mb = $(".menu-btn");
   mb.addEventListener("click", () => {

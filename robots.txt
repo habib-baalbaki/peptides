@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /cart.html
+Disallow: /cart
+
+Sitemap: https://nxtcanada.ca/sitemap.xml

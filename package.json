@@ -1,0 +1,12 @@
+{
+  "name": "nxt-peptides-canada",
+  "private": true,
+  "description": "Static site for nxtcanada.ca. No runtime dependencies.",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/check.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
