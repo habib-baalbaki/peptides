@@ -78,7 +78,7 @@ export const PRODUCTS = {
     "price": 70
   },
   "retatrutide": {
-    "name": "Retatrutide (RETA)",
+    "name": "R3taa",
     "size": "20 mg",
     "price": 150
   },
@@ -113,7 +113,7 @@ export const PRODUCTS = {
     "price": 55
   },
   "retatrutide-40": {
-    "name": "Retatrutide (RETA)",
+    "name": "R3taa",
     "size": "40 mg",
     "price": 200
   },
