@@ -22,9 +22,10 @@ window.NXT_CONFIG = {
   whatsapp: "17809048085",       // digits only, used for wa.me links
   pricesArePlaceholders: false,
   domain: "nxtcanada.ca",
-  // TODO paste the Cloudflare Web Analytics token (Cloudflare dashboard > Analytics & Logs >
-  // Web Analytics > Add a site > nxtcanada.ca, the "token" value in the JS snippet), then run
-  // `npm run build`. While empty, no analytics script is added to the pages.
+  // Cloudflare Web Analytics is on with "Automatic setup": Cloudflare injects the beacon at the
+  // edge, so leave this EMPTY (a token here would load the beacon twice and double-count).
+  // Only paste the site token (Web Analytics > nxtcanada.ca > Manage site) and run
+  // `npm run build` if automatic setup is ever turned off or the site moves off Cloudflare.
   cfAnalyticsToken: "",
   wallets: {
     BTC: "bc1qd5l8srh0v6vafaaxdha64chnt5s4w2fpejee0h",

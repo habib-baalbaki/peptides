@@ -51,7 +51,7 @@ How it works:
 
 Everything marked `TODO` in `assets/js/data.js`:
 
-- [ ] **Analytics.** Paste the Cloudflare Web Analytics token into `cfAnalyticsToken`, then run `npm run build`.
+- [x] **Analytics.** Cloudflare Web Analytics runs with automatic setup, so Cloudflare injects the beacon itself. Leave `cfAnalyticsToken` empty unless automatic setup is turned off; setting both would double-count.
 - [ ] **Search engines.** Submit `https://nxtcanada.ca/sitemap.xml` in Google Search Console and Bing Webmaster Tools, then check that the product pages get indexed.
 
 - [ ] **Prices.** Current prices are placeholders near the Canadian market median. Enter real prices, then set `pricesArePlaceholders: false` to remove the yellow preview bar.

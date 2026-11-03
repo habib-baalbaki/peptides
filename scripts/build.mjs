@@ -360,5 +360,5 @@ write(LASTMOD_FILE, manifest);
 })("");
 
 if (faqSkipped.length) console.log(`  note: FAQPage schema leaves out ${faqSkipped.length} question(s) with restricted phrases: ${faqSkipped.join(" | ")}`);
-if (!C.cfAnalyticsToken) console.log("  note: NXT_CONFIG.cfAnalyticsToken is empty, so no analytics beacon was added (TODO in assets/js/data.js)");
+if (!C.cfAnalyticsToken) console.log("  note: no analytics beacon in the HTML (cfAnalyticsToken empty); Cloudflare automatic setup injects it at the edge");
 console.log(`build: ${rootPages.length} pages + ${P.length} product pages, sitemap (${indexable.length} URLs), robots, icons. ${changed ? `${changed} file(s) changed.` : "No changes."}`);
