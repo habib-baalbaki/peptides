@@ -221,3 +221,10 @@ footer.site { background: #fff; border-top: 1px solid var(--line); margin-top: 6
 .inv-addr { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
 .inv-addr code { flex: 1; min-width: 0; word-break: break-all; font-size: .8rem; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; }
 .inv-addr .btn { padding: 8px 14px; }
+
+/* order/newsletter forms */
+.hp { position: absolute !important; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.notice { border: 1px solid #e8b4b4; background: #fdf2f2; color: #7a1f1f; border-radius: 12px; padding: 12px 14px; }
+.notice a { color: inherit; font-weight: 600; }
+.newsletter [data-msg] { flex-basis: 100%; margin: 0; font-size: .85rem; opacity: .85; }
+.newsletter [data-msg]:empty { display: none; }

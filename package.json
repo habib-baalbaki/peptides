@@ -4,9 +4,16 @@
   "description": "Static site for nxtcanada.ca. No runtime dependencies.",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "check": "node scripts/check.mjs"
+    "check": "node scripts/check.mjs",
+    "dev": "wrangler dev"
   },
   "engines": {
     "node": ">=18"
+  },
+  "devDependencies": {
+    "wrangler": "^4.157.0"
+  },
+  "allowScripts": {
+    "workerd@1.20261103.1": true
   }
 }

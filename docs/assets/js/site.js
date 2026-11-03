@@ -209,42 +209,64 @@
       };
       $("#checkout").first.addEventListener("change", draw);
       $("#checkout").province.addEventListener("change", draw);
-      const COINS = { BTC: ["bitcoin", 8], ETH: ["ethereum", 6], USDT: ["tether", 2] };
       const qr = (s) => { const q = qrcode(0, "M"); q.addData(s); q.make(); return q.createSvgTag({ cellSize: 5, margin: 2 }); };
-      $("#checkout").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        e.target.querySelector("[type=submit]").disabled = true;
-        const f = new FormData(e.target), t = totals(), coin = f.get("pay"), addr = (C.wallets || {})[coin];
-        const [cg, dp] = COINS[coin];
-        const order = "NXT-" + Date.now().toString(36).toUpperCase();
-        let amt = "";
-        try {
-          const r = await (await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cg}&vs_currencies=cad`)).json();
-          amt = (t.total / r[cg].cad).toFixed(dp);
-        } catch (err) {} // no live rate: we email the exact amount instead
-        const items = cart.items();
-        const lines = items.map((i) => `${i.qty} x ${byId(i.id).name} ${byId(i.id).size} @ ${money(byId(i.id).price)}`);
+      // plain-text order for the mailto fallback, used only when the order API can't be reached
+      const mailto = (f, t, ref) => {
+        const lines = cart.items().map((i) => `${i.qty} x ${byId(i.id).name} ${byId(i.id).size} @ ${money(byId(i.id).price)}`);
         const body = [
-          `ORDER ${order}`, "", ...lines, "",
+          `ORDER REQUEST ${ref}`, "", ...lines, "",
           `Subtotal: ${money(t.sub)}`, ...(t.off ? [`First-order discount: -${money(t.off)}`] : []), `Shipping: ${t.ship ? money(t.ship) : "Free"}`, `GST/HST (${t.prov}): ${money(t.tax)}`, `Total: ${money(t.total)} ${C.currency}`, "",
           `Name: ${f.get("name")}`, `Email: ${f.get("email")}`, `Address: ${f.get("address")}, ${f.get("city")}, ${f.get("province")} ${f.get("postal")}`,
-          `Payment: ${amt ? `${amt} ${coin}` : coin}${addr ? ` to ${addr}` : ""}`, "", "Purchaser confirms items are for laboratory research use only and that they are 18+."
+          `Payment: ${f.get("pay")}`, "", "Purchaser confirms items are for laboratory research use only and that they are 18+."
         ].join("\n");
-        const mail = `mailto:${C.email}?subject=${encodeURIComponent(`Order ${order} – NXT Peptides Canada`)}&body=${encodeURIComponent(body)}`;
+        return `mailto:${C.email}?subject=${encodeURIComponent(`Order request ${ref} – NXT Peptides Canada`)}&body=${encodeURIComponent(body)}`;
+      };
+      const form = $("#checkout"), btn = form.querySelector("[type=submit]"), btnText = btn.textContent;
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (btn.disabled) return;
+        btn.disabled = true;
+        btn.textContent = "Placing order…";
+        $("#order-error")?.remove();
+        const f = new FormData(form), t = totals();
+        let res, data = {};
+        try {
+          res = await fetch("/api/order", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              items: cart.items(), name: f.get("name"), email: f.get("email"), address: f.get("address"), city: f.get("city"),
+              province: f.get("province"), postal: f.get("postal"), pay: f.get("pay"), first: !!f.get("first"),
+              confirm: !!f.get("confirm"), website: f.get("website") || ""
+            })
+          });
+          data = await res.json().catch(() => ({}));
+        } catch (err) { res = null; }
+        if (!res || !res.ok || !data.ok) {
+          // keep the cart; tell the customer what happened and offer email as a fallback
+          btn.disabled = false;
+          btn.textContent = btnText;
+          const reachable = res && res.status >= 400 && res.status < 500 && data.error;
+          btn.insertAdjacentHTML("beforebegin", `<div class="notice" id="order-error" role="alert">
+            <p class="small" style="margin:0"><strong>Your order wasn't placed.</strong> ${esc(reachable ? data.error : "We couldn't reach our order system.")} Your cart is saved.</p>
+            ${reachable ? "" : `<p class="small" style="margin:8px 0 0">Try again in a minute, or <a href="${mailto(f, t, "NXT-" + Date.now().toString(36).toUpperCase())}">email us your order</a> instead.</p>`}
+          </div>`);
+          return;
+        }
         // ponytail: one fixed address per coin, payments matched to orders by amount; BTCPay Server gives per-order addresses + auto-confirm
+        const { order, total, amount: amt, coin, wallet: addr } = data;
         const uri = coin === "BTC" && amt ? `bitcoin:${addr}?amount=${amt}` : addr;
         $(".summary").innerHTML = `
-          <h3>Pay with ${coin}</h3>
-          <p class="small muted" style="margin:0">Order ${order}</p>
-          ${amt ? `<p class="inv-amt">${amt} ${coin}</p><p class="small muted" style="margin:0">= ${money(t.total)} ${C.currency} · rate held for <strong id="inv-timer">30:00</strong></p>`
-            : `<p class="inv-amt">${money(t.total)} ${C.currency}</p><p class="small muted" style="margin:0">We'll email you the exact ${coin} amount.</p>`}
+          <h3>Pay with ${esc(coin)}</h3>
+          <p class="small muted" style="margin:0">Order <strong>${esc(order)}</strong> received</p>
+          ${amt ? `<p class="inv-amt">${esc(amt)} ${esc(coin)}</p><p class="small muted" style="margin:0">= ${money(total)} ${C.currency} · rate held for <strong id="inv-timer">30:00</strong></p>`
+            : `<p class="inv-amt">${money(total)} ${C.currency}</p><p class="small muted" style="margin:0">We'll email you the exact ${esc(coin)} amount.</p>`}
           ${addr ? `${typeof qrcode === "function" ? `<div class="inv-qr">${qr(uri)}</div>` : ""}
             <p class="small muted" style="margin:12px 0 4px">Send to this address${coin === "USDT" ? " (Ethereum network, ERC-20 only)" : ""}</p>
             <div class="inv-addr"><code>${esc(addr)}</code><button class="btn ghost" type="button" data-copy="${esc(addr)}">Copy</button></div>`
-            : `<p class="small">We'll email you the ${coin} wallet address.</p>`}
-          <p class="small">Send the exact amount shown. Your order ships once the payment confirms. Your email app opened with your order details — please send that email.</p>
-          <a class="btn ghost block" href="${mail}">Email my order again</a>`;
-        $("#lines").innerHTML = `<p class="empty">Thanks! Order <strong>${order}</strong> is waiting for payment.</p>`;
+            : `<p class="small">We'll email you the ${esc(coin)} wallet address.</p>`}
+          <p class="small">Send the exact amount shown. Your order ships once the payment confirms, and tracking is sent to ${esc(f.get("email"))}. Keep your order number <strong>${esc(order)}</strong> for any questions.</p>`;
+        $("#lines").innerHTML = `<p class="empty">Thanks! Order <strong>${esc(order)}</strong> is waiting for payment.</p>`;
         cart.save([]);
         if (amt) {
           const end = Date.now() + 30 * 60e3;
@@ -254,7 +276,6 @@
             if (!s) clearInterval(tick);
           }, 1000);
         }
-        location.href = mail;
       });
       draw();
     },
@@ -275,5 +296,28 @@
   });
   renderCount();
   if (pages[page]) pages[page]();
+
+  /* newsletter signup: any <form data-subscribe> */
+  document.querySelectorAll("form[data-subscribe]").forEach((form) => {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const b = form.querySelector("button"), msg = form.querySelector("[data-msg]");
+      b.disabled = true;
+      const f = new FormData(form);
+      try {
+        const res = await fetch("/api/subscribe", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ email: f.get("email"), website: f.get("website") || "", source: form.dataset.subscribe })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) throw new Error(data.error || "");
+        form.innerHTML = `<p style="margin:0" role="status">You're on the list. Tick "first order" at checkout to get ${C.firstOrderDiscount * 100}% off.</p>`;
+      } catch (err) {
+        b.disabled = false;
+        msg.textContent = err.message || "Couldn't sign you up just now. Please try again.";
+      }
+    });
+  });
   ageGate();
 })();

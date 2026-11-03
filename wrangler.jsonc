@@ -1,6 +1,36 @@
-// Cloudflare Workers: serve the static site in docs/
+// Cloudflare Workers: serve the static site in docs/, plus the /api/* Worker (orders, newsletter).
+// Setup steps: README.md, "Orders & newsletter backend".
 {
-  "name": "peptides",
-  "compatibility_date": "2025-10-01",
-  "assets": { "directory": "./docs" }
+	"name": "peptides",
+	"compatibility_date": "2025-10-01",
+	"main": "worker/index.js",
+	"assets": {
+		"directory": "./docs",
+		"binding": "ASSETS",
+		"run_worker_first": [
+			"/api/*"
+		]
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "nxt-orders",
+			"database_id": "6484dcdb-6a9f-4521-a259-5274d49325a9",
+			"migrations_dir": "migrations"
+		}
+	],
+	// Order alerts. The destination must be verified in Cloudflare Email Routing for nxtcanada.ca.
+	"send_email": [
+		{
+			"name": "ORDER_EMAIL",
+			"destination_address": "nxtcanada@outlook.com"
+		}
+	],
+	"vars": {
+		"ORDER_TO": "nxtcanada@outlook.com",
+		"ORDER_FROM": "orders@nxtcanada.ca"
+	},
+	"observability": {
+		"enabled": true
+	}
 }
