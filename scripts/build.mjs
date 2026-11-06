@@ -52,6 +52,11 @@ const TODAY = new Date().toISOString().slice(0, 10);
     if (!CATS.some((c) => c.id === p.cat)) fail(`${p.id}: unknown category "${p.cat}"`);
     if (p.img && !fs.existsSync(rel("assets/img", p.img))) fail(`${p.id}: missing image assets/img/${p.img}`);
   }
+  for (const c of CATS) {
+    if (!c.slug || !/^[a-z0-9-]+$/.test(c.slug)) fail(`category "${c.id}" needs a lowercase slug`);
+    for (const k of ["h1", "title", "desc", "intro"]) if (!c[k]) fail(`category "${c.id}" is missing ${k}`);
+  }
+  if (new Set(CATS.map((c) => c.slug)).size !== CATS.length) fail("duplicate category slug");
   if (C.cfAnalyticsToken && !/^[A-Za-z0-9]+$/.test(C.cfAnalyticsToken)) fail("cfAnalyticsToken should be the bare token from the Cloudflare snippet");
 }
 
@@ -141,9 +146,24 @@ function productSchema(p, url) {
       itemListElement: [
         { "@type": "ListItem", position: 1, name: "Home", item: `${SITE}/` },
         { "@type": "ListItem", position: 2, name: "Shop", item: pageUrl("shop.html") },
-        { "@type": "ListItem", position: 3, name: `${p.name} ${p.size}`, item: url }
+        { "@type": "ListItem", position: 3, name: R.catName(p.cat), item: pageUrl(R.catHref(R.catById(p.cat))) },
+        { "@type": "ListItem", position: 4, name: `${p.name} ${p.size}`, item: url }
       ]
     }
+  ];
+}
+
+function categorySchema(c, url) {
+  const items = P.filter((p) => p.cat === c.id);
+  return [
+    { "@type": "CollectionPage", "@id": `${url}#page`, url, name: c.h1, description: c.desc,
+      mainEntity: { "@type": "ItemList", numberOfItems: items.length,
+        itemListElement: items.map((p, i) => ({ "@type": "ListItem", position: i + 1, url: pageUrl(R.productHref(p)), name: `${p.name} ${p.size}` })) } },
+    { "@type": "BreadcrumbList", itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: `${SITE}/` },
+      { "@type": "ListItem", position: 2, name: "Shop", item: pageUrl("shop.html") },
+      { "@type": "ListItem", position: 3, name: c.name, item: url }
+    ] }
   ];
 }
 
@@ -201,7 +221,7 @@ function headBlock({ root, url, title, description, image, type, noindex, graph,
 }
 
 /* ---------- page rendering ---------- */
-function renderPage(html, { file, root, product }) {
+function renderPage(html, { file, root, product, category }) {
   const opts = { analytics: true, schema: true, ...PAGE_OPTS[file] };
   const page = (html.match(/<body[^>]*\bdata-page="([^"]+)"/) || [])[1];
   if (!page) fail(`${file}: <body> has no data-page`);
@@ -215,7 +235,7 @@ function renderPage(html, { file, root, product }) {
 
   let graph = null;
   if (opts.schema) {
-    graph = [organization, ...(product ? productSchema(product, url) : []), ...faqSchema(html, url)];
+    graph = [organization, ...(product ? productSchema(product, url) : []), ...(category ? categorySchema(category, url) : []), ...faqSchema(html, url)];
     guard(`${file} JSON-LD`, JSON.stringify(graph));
   }
 
@@ -233,13 +253,16 @@ function renderPage(html, { file, root, product }) {
     "coa-rows": () => R.coaRows(root),
     pdp: () => R.pdp(product, root),
     related: () => R.cards(R.related(product), root),
-    crumb: () => esc(product.name)
+    crumb: () => `<a href="${R.catHref(R.catById(product.cat), root)}">${esc(R.catName(product.cat))}</a> / ${esc(product.name)}`,
+    "cat-intro": () => category.intro.replaceAll("{{ROOT}}", root),
+    "cat-grid": () => R.cards(P.filter((p) => p.cat === category.id), root)
   };
 
   const names = [...html.matchAll(/<!-- nxt:([\w-]+) -->/g)].map((m) => m[1]);
   for (const name of names) {
     if (!GEN[name]) fail(`${file}: unknown region nxt:${name}`);
     if (["pdp", "related", "crumb"].includes(name) && !product) fail(`${file}: nxt:${name} only works on product pages`);
+    if (["cat-intro", "cat-grid"].includes(name) && !category) fail(`${file}: nxt:${name} only works on category pages`);
     const re = new RegExp(`(<!-- nxt:${name} -->)[\\s\\S]*?(<!-- /nxt:${name} -->)`);
     if (!re.test(html)) fail(`${file}: nxt:${name} has no closing <!-- /nxt:${name} -->`);
     const out = GEN[name]();
@@ -277,6 +300,24 @@ for (const p of P) {
   indexable.push({ url: r.url, file });
 }
 
+const catTemplate = readText(rel("templates/category.html"));
+for (const c of CATS) {
+  const file = `category/${c.slug}.html`;
+  guard(`${file} intro`, c.intro);
+  const title = `${c.title} | ${C.brand}`.length <= 75 ? `${c.title} | ${C.brand}` : c.title;
+  let html = catTemplate
+    .replaceAll("{{ROOT}}", "../")
+    .replaceAll("{{TITLE}}", esc(title))
+    .replaceAll("{{DESCRIPTION}}", esc(c.desc))
+    .replaceAll("{{H1}}", esc(c.h1))
+    .replaceAll("{{NAME}}", esc(c.name))
+    .replaceAll("{{CAT}}", c.id);
+  if (html.includes("{{")) fail(`templates/category.html: unknown placeholder ${html.match(/{{w*}}/)}`);
+  const r = renderPage(html, { file, root: "../", category: c });
+  outputs.set(file, r.html);
+  indexable.push({ url: r.url, file });
+}
+
 /* ---------- lastmod: only changes when a page's HTML changes ---------- */
 const LASTMOD_FILE = rel("scripts/lastmod.json");
 const oldLastmod = fs.existsSync(LASTMOD_FILE) ? JSON.parse(fs.readFileSync(LASTMOD_FILE, "utf8")) : {};
@@ -305,6 +346,11 @@ outputs.set("robots.txt", [
   ""
 ].join("\n"));
 
+// IndexNow ownership file (see scripts/indexnow.mjs)
+if (C.indexNowKey) {
+  if (!/^[a-f0-9]{32}$/.test(C.indexNowKey)) fail("indexNowKey must be 32 hex characters");
+  outputs.set(`${C.indexNowKey}.txt`, C.indexNowKey);
+}
 outputs.set("favicon.svg", icons.svg());
 outputs.set("favicon.ico", icons.ico([16, 32, 48]));
 outputs.set("apple-touch-icon.png", icons.png(180, { rounded: false }));
@@ -347,10 +393,10 @@ write(rel("worker/catalogue.js"), [
 })("assets");
 
 // remove product pages whose product no longer exists
-for (const base of [ROOT, DOCS]) {
-  const dir = path.join(base, "products");
+for (const base of [ROOT, DOCS]) for (const sub of ["products", "category"]) {
+  const dir = path.join(base, sub);
   for (const f of fs.existsSync(dir) ? fs.readdirSync(dir) : []) {
-    if (f.endsWith(".html") && !outputs.has(`products/${f}`)) {
+    if (f.endsWith(".html") && !outputs.has(`${sub}/${f}`)) {
       fs.unlinkSync(path.join(dir, f));
       changed++;
       console.log(`  removed ${path.relative(ROOT, path.join(dir, f)).replace(/\\/g, "/")}`);
@@ -372,4 +418,4 @@ write(LASTMOD_FILE, manifest);
 
 if (faqSkipped.length) console.log(`  note: FAQPage schema leaves out ${faqSkipped.length} question(s) with restricted phrases: ${faqSkipped.join(" | ")}`);
 if (!C.cfAnalyticsToken) console.log("  note: no analytics beacon in the HTML (cfAnalyticsToken empty); Cloudflare automatic setup injects it at the edge");
-console.log(`build: ${rootPages.length} pages + ${P.length} product pages, sitemap (${indexable.length} URLs), robots, icons. ${changed ? `${changed} file(s) changed.` : "No changes."}`);
+console.log(`build: ${rootPages.length} pages + ${P.length} product pages + ${CATS.length} category pages, sitemap (${indexable.length} URLs), robots, icons. ${changed ? `${changed} file(s) changed.` : "No changes."}`);

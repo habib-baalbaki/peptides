@@ -18,6 +18,8 @@
   const catName = (id) => (CATS.find((c) => c.id === id) || {}).name || "";
   const imgSrc = (p, root = "") => `${root}assets/img/${p.img || "vial.svg"}`;
   const productHref = (p, root = "") => `${root}products/${p.id}.html`;
+  const catHref = (c, root = "") => (c.slug ? `${root}category/${c.slug}.html` : `${root}shop.html?cat=${c.id}`);
+  const catById = (id) => CATS.find((c) => c.id === id) || { id, name: "" };
 
   const NAV = [
     ["shop.html", "Shop", "shop"],
@@ -59,7 +61,7 @@
             </div>
             <div><h4>Shop</h4>
               <a href="${root}shop.html">All products</a>
-              ${CATS.slice(0, 4).map((c) => `<a href="${root}shop.html?cat=${c.id}">${esc(c.name)}</a>`).join("")}
+              ${CATS.slice(0, 4).map((c) => `<a href="${catHref(c, root)}">${esc(c.name)}</a>`).join("")}
             </div>
             <div><h4>Company</h4>
               <a href="${root}about.html">About NXT Canada</a>
@@ -107,7 +109,7 @@
   function catTiles(root = "") {
     return CATS.map((c) => {
       const n = P.filter((p) => p.cat === c.id).length;
-      return `<a class="cat" href="${root}shop.html?cat=${c.id}"><b>${esc(c.name)}</b><em>${n}</em></a>`;
+      return `<a class="cat" href="${catHref(c, root)}"><b>${esc(c.name)}</b><em>${n}</em></a>`;
     }).join("");
   }
 
@@ -129,7 +131,7 @@
     return `
         <div class="pdp-img"><img src="${imgSrc(p, root)}" alt="${esc(p.name)} ${esc(p.size)} vial" width="440" height="550" style="width:100%"></div>
         <div>
-          <p class="eyebrow">${esc(catName(p.cat))}</p>
+          <p class="eyebrow"><a href="${catHref(catById(p.cat), root)}" style="color:inherit;text-decoration:none">${esc(catName(p.cat))}</a></p>
           <h1>${esc(p.name)} <span class="muted" style="font-weight:300">${esc(p.size)}</span></h1>
           <p class="tagline">${esc(p.tagline)}</p>
           <div class="big-price">${p.price ? `${money(p.price)} <small class="muted" style="font-size:.9rem;font-weight:400">${C.currency}</small>` : "FREE"}</div>
@@ -176,7 +178,7 @@
   }
 
   w.NXT_RENDER = {
-    esc, money, price, byId, catName, imgSrc, productHref, NAV,
+    esc, money, price, byId, catName, catById, catHref, imgSrc, productHref, NAV,
     header, footer, card, cards, catTiles, chips, allCount, resultCount,
     related, pdp, labName, coaRows
   };

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<meta name="description" content="{{DESCRIPTION}}">
+<!-- nxt:head --><!-- /nxt:head -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ROOT}}assets/css/style.css">
+</head>
+<body data-page="category" data-root="{{ROOT}}" data-cat="{{CAT}}">
+<!--
+  Category landing page template. scripts/build.mjs generates category/<slug>.html from this
+  file for every category in assets/js/data.js. Edit this template, not the generated pages.
+-->
+<div id="site-header"><!-- nxt:header --><!-- /nxt:header --></div>
+<main>
+<section class="page-head"><div class="container">
+  <p class="crumbs" style="padding-top:0"><a href="{{ROOT}}index.html">Home</a> / <a href="{{ROOT}}shop.html">Shop</a> / {{NAME}}</p>
+  <h1 style="font-size:clamp(1.8rem,3.4vw,2.6rem)">{{H1}}</h1>
+  <div class="prose muted"><!-- nxt:cat-intro --><!-- /nxt:cat-intro --></div>
+</div></section>
+<section class="section container" style="padding-top:28px">
+  <div class="grid"><!-- nxt:cat-grid --><!-- /nxt:cat-grid --></div>
+  <div class="section-head" style="margin-top:48px"><div><p class="eyebrow">Browse</p><h2>Other research areas</h2></div></div>
+  <div class="cats"><!-- nxt:cats --><!-- /nxt:cats --></div>
+</section>
+</main>
+<div id="site-footer"><!-- nxt:footer --><!-- /nxt:footer --></div>
+<script src="{{ROOT}}assets/js/data.js"></script>
+<script src="{{ROOT}}assets/js/render.js"></script>
+<script src="{{ROOT}}assets/js/site.js"></script>
+</body>
+</html>

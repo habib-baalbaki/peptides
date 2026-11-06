@@ -1,118 +1,150 @@
 {
   "https://nxtcanada.ca/": {
-    "hash": "8a54a8dea986e5f4",
-    "lastmod": "2026-11-03"
+    "hash": "b47743622ee4ac69",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/about": {
-    "hash": "eb492905cf28daeb",
-    "lastmod": "2026-11-03"
+    "hash": "d980babecef66268",
+    "lastmod": "2026-11-06"
+  },
+  "https://nxtcanada.ca/category/gh-secretagogue-peptides": {
+    "hash": "bf01b1fc8989097f",
+    "lastmod": "2026-11-06"
+  },
+  "https://nxtcanada.ca/category/lab-supplies": {
+    "hash": "3557b17f3c63f5c8",
+    "lastmod": "2026-11-06"
+  },
+  "https://nxtcanada.ca/category/melanocortin-hpg-axis-peptides": {
+    "hash": "57d965017949b6b0",
+    "lastmod": "2026-11-06"
+  },
+  "https://nxtcanada.ca/category/metabolic-research-peptides": {
+    "hash": "80a2b419a9131014",
+    "lastmod": "2026-11-06"
+  },
+  "https://nxtcanada.ca/category/mitochondrial-longevity-research-peptides": {
+    "hash": "ab5baa0c6e094a6c",
+    "lastmod": "2026-11-06"
+  },
+  "https://nxtcanada.ca/category/neuropeptide-research": {
+    "hash": "7cdd9d1417694be1",
+    "lastmod": "2026-11-06"
+  },
+  "https://nxtcanada.ca/category/research-peptide-blends": {
+    "hash": "373aa86240c7a2b4",
+    "lastmod": "2026-11-06"
+  },
+  "https://nxtcanada.ca/category/tissue-repair-research-peptides": {
+    "hash": "779dc5f080e70014",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/contact": {
-    "hash": "1724f4f516fc7235",
-    "lastmod": "2026-11-03"
+    "hash": "9cf8454c5ba99e8f",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/faq": {
-    "hash": "93e98ab902206536",
-    "lastmod": "2026-11-03"
+    "hash": "98140d39f654388b",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/lab-results": {
-    "hash": "26942ddd433b00f5",
-    "lastmod": "2026-11-03"
+    "hash": "5d135a5d5bbbe21a",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/policies": {
-    "hash": "6c5faa75b2128c56",
-    "lastmod": "2026-11-03"
+    "hash": "afa802149ac6d93b",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/products/bac-water": {
-    "hash": "e652a8df72690420",
-    "lastmod": "2026-11-03"
+    "hash": "8fc10cc1d3bf05de",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/products/bpc157": {
-    "hash": "bc3997d92a891c49",
-    "lastmod": "2026-11-03"
+    "hash": "2334929da6bdf2c7",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/products/bpc157-tb500": {
-    "hash": "4db913ff3d2ebbcb",
-    "lastmod": "2026-11-03"
+    "hash": "56415e4eca37e736",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/products/cjc1295-ipamorelin": {
-    "hash": "d943f957f94dd2ed",
-    "lastmod": "2026-11-03"
+    "hash": "458422c44468e174",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/products/dsip": {
-    "hash": "f87a7ca32f864d84",
-    "lastmod": "2026-11-03"
+    "hash": "7dd0b06393b670f9",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/products/ghk-cu": {
-    "hash": "8d20122e53fec253",
-    "lastmod": "2026-11-03"
+    "hash": "b3327976fc4fcc94",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/products/ghk-cu-100": {
-    "hash": "3f3a98412a1e4ced",
-    "lastmod": "2026-11-03"
+    "hash": "97276e7a56cebdb7",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/products/ghrp6": {
-    "hash": "f983a4f049321af2",
-    "lastmod": "2026-11-03"
+    "hash": "9e436bcc11fb10e2",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/products/glow": {
-    "hash": "70e1082282a9dda9",
-    "lastmod": "2026-11-03"
+    "hash": "ae83418450588405",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/products/ipamorelin": {
-    "hash": "88af9d5dd689132a",
-    "lastmod": "2026-11-03"
+    "hash": "9a42ecb9803ddd6b",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/products/kisspeptin10": {
-    "hash": "2a585d6d79250dd6",
-    "lastmod": "2026-11-03"
+    "hash": "1f750b9f0546ecf4",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/products/klow": {
-    "hash": "6e353f50ec668e96",
-    "lastmod": "2026-11-03"
+    "hash": "80d1f402313bf986",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/products/mots-c": {
-    "hash": "1f56dc05100cad34",
-    "lastmod": "2026-11-03"
+    "hash": "9d7e88156be71e6b",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/products/nad": {
-    "hash": "f177320cf580579d",
-    "lastmod": "2026-11-03"
+    "hash": "30c53451f0432fdf",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/products/pt141": {
-    "hash": "cb0d675df7920900",
-    "lastmod": "2026-11-03"
+    "hash": "42c2a8e1de80fc16",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/products/retatrutide": {
-    "hash": "05f0dbfa858804a6",
-    "lastmod": "2026-11-03"
+    "hash": "d5107df9275ecf31",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/products/retatrutide-40": {
-    "hash": "81257a6f7c2f934e",
-    "lastmod": "2026-11-03"
+    "hash": "8b160894d25fb084",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/products/selank": {
-    "hash": "77ed639f346c0e3c",
-    "lastmod": "2026-11-03"
+    "hash": "a50dbf4f56946a08",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/products/semax": {
-    "hash": "1f30d87120d65225",
-    "lastmod": "2026-11-03"
+    "hash": "82e21b035584cc19",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/products/ss31": {
-    "hash": "32d85ea1f61a077c",
-    "lastmod": "2026-11-03"
+    "hash": "0a12fee9f8087149",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/products/tb500": {
-    "hash": "f0fe599a2c8185ce",
-    "lastmod": "2026-11-03"
+    "hash": "eca4355e03c12f9b",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/products/tesamorelin": {
-    "hash": "0a82befff46d83fc",
-    "lastmod": "2026-11-03"
+    "hash": "a8527bda637d3f6d",
+    "lastmod": "2026-11-06"
   },
   "https://nxtcanada.ca/shop": {
-    "hash": "862d84d29bb6bd39",
-    "lastmod": "2026-11-03"
+    "hash": "63b35c089c7795f2",
+    "lastmod": "2026-11-06"
   }
 }

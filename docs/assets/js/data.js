@@ -22,6 +22,7 @@ window.NXT_CONFIG = {
   whatsapp: "17809048085",       // digits only, used for wa.me links
   pricesArePlaceholders: false,
   domain: "nxtcanada.ca",
+  indexNowKey: "80238307beff2ac9f597598b8294dc68", // public by design: served at /<key>.txt so Bing/IndexNow can verify ownership
   // Cloudflare Web Analytics is on with "Automatic setup": Cloudflare injects the beacon at the
   // edge, so leave this EMPTY (a token here would load the beacon twice and double-count).
   // Only paste the site token (Web Analytics > nxtcanada.ca > Manage site) and run
@@ -34,15 +35,51 @@ window.NXT_CONFIG = {
   }
 };
 
+/*
+ * Categories. slug/h1/title/desc/intro build the static landing page category/<slug>.html.
+ * Research-model language only: no dosing, human use, or health/benefit claims.
+ */
 window.NXT_CATEGORIES = [
-  { id: "repair",    name: "Tissue & repair research" },
-  { id: "blends",    name: "Research blends" },
-  { id: "gh",        name: "GH secretagogues" },
-  { id: "metabolic", name: "Metabolic research" },
-  { id: "longevity", name: "Mitochondrial & longevity" },
-  { id: "neuro",     name: "Neuropeptide research" },
-  { id: "hpg",       name: "Melanocortin & HPG axis" },
-  { id: "supplies",  name: "Lab supplies" }
+  { id: "repair", name: "Tissue & repair research", slug: "tissue-repair-research-peptides",
+    h1: "Tissue & repair research peptides",
+    title: "Tissue Repair Research Peptides Canada | UK-Tested",
+    desc: "BPC-157, TB-500 and GHK-Cu research peptides, shipped from Canada. Every batch independently tested in the UK (HPLC + MS). Prices in CAD.",
+    intro: "<p>This range covers the peptides most often used in preclinical research on tissue repair: <strong>BPC-157</strong>, a synthetic pentadecapeptide studied in animal models of tendon, ligament and gastrointestinal injury; <strong>TB-500</strong>, a fragment of thymosin beta-4 studied for its role in actin regulation and cell migration; and <strong>GHK-Cu</strong>, a copper-binding tripeptide investigated in wound-healing and extracellular-matrix models.</p><p>Every lot is tested by an independent UK laboratory for purity (HPLC) and identity (mass spectrometry). The lot number printed on each vial matches the certificate of analysis on our <a href=\"{{ROOT}}lab-results.html\">UK lab results</a> page. Orders ship from Canada by tracked Xpresspost, with prices in CAD.</p>" },
+  { id: "blends", name: "Research blends", slug: "research-peptide-blends",
+    h1: "Research peptide blends",
+    title: "Research Peptide Blends Canada: BPC-157/TB-500, GLOW, KLOW",
+    desc: "Pre-formulated research blends: BPC-157 + TB-500, GLOW and KLOW. UK-tested, shipped across Canada with tracking. Prices in CAD.",
+    intro: "<p>Blends combine several research peptides in a single lyophilized vial, so multi-compound studies start from one reconstitution rather than several. The range includes <strong>BPC-157 + TB-500</strong>, <strong>GLOW</strong> (GHK-Cu, BPC-157 and TB-500) and <strong>KLOW</strong> (GHK-Cu, KPV, BPC-157 and TB-500).</p><p>The amount of each component is listed on its product page. Like every NXT product, each blend lot is tested independently in the UK, and the lot number on the vial matches its published COA.</p>" },
+  { id: "gh", name: "GH secretagogues", slug: "gh-secretagogue-peptides",
+    h1: "GH secretagogue research peptides",
+    title: "GH Secretagogue Peptides Canada: Ipamorelin, CJC-1295",
+    desc: "Ipamorelin, CJC-1295 + Ipamorelin, GHRP-6 and Tesamorelin for laboratory research. UK-tested batches, shipped from Canada.",
+    intro: "<p>Growth hormone secretagogues are peptides studied for how they act on the GH axis in laboratory models. They fall into two groups: ghrelin-receptor agonists (GHRPs) such as <strong>Ipamorelin</strong> and <strong>GHRP-6</strong>, and GHRH analogues such as <strong>CJC-1295</strong> and <strong>Tesamorelin</strong>. Researchers often study the two classes together, which is why CJC-1295 + Ipamorelin is offered as a blend.</p><p>Each lot is tested by an independent UK lab for purity and identity before it ships from Canada. Match the lot number on your vial to its certificate on the <a href=\"{{ROOT}}lab-results.html\">lab results</a> page.</p>" },
+  { id: "metabolic", name: "Metabolic research", slug: "metabolic-research-peptides",
+    h1: "Metabolic research peptides",
+    title: "Metabolic Research Peptides Canada | UK-Tested",
+    desc: "Metabolic research peptides for laboratory use, independently tested in the UK and shipped across Canada. Prices in CAD.",
+    intro: "<p>Peptides in this range are studied in laboratory models of metabolic and incretin-receptor signalling. They are supplied as lyophilized powder for research use only.</p><p>Each lot is independently tested in the UK by HPLC and mass spectrometry, and the certificate is matched to the lot number on the vial.</p>" },
+  { id: "longevity", name: "Mitochondrial & longevity", slug: "mitochondrial-longevity-research-peptides",
+    h1: "Mitochondrial & longevity research",
+    title: "MOTS-c, SS-31 & NAD+ Canada | Mitochondrial Research",
+    desc: "MOTS-c, SS-31 and NAD+ for mitochondrial and cellular-ageing research. UK-tested lots, shipped from Canada with tracking.",
+    intro: "<p>This range is aimed at research into mitochondrial function and cellular ageing. <strong>MOTS-c</strong> is a mitochondrial-derived peptide studied in models of metabolic regulation. <strong>SS-31</strong> (elamipretide) is a cardiolipin-targeting tetrapeptide investigated in models of mitochondrial dysfunction. <strong>NAD+</strong> is the coenzyme central to cellular redox and sirtuin research.</p><p>All lots are tested independently in the UK, and each certificate is published against the lot number on the vial.</p>" },
+  { id: "neuro", name: "Neuropeptide research", slug: "neuropeptide-research",
+    h1: "Neuropeptide research",
+    title: "Selank, Semax & DSIP Canada | Neuropeptide Research",
+    desc: "Selank, Semax and DSIP neuropeptides for laboratory research. Independently tested in the UK, shipped across Canada.",
+    intro: "<p>This range covers peptides studied in neuroscience research models. <strong>Selank</strong> is a synthetic analogue of the immunomodulatory peptide tuftsin. <strong>Semax</strong> is a synthetic fragment derived from ACTH(4-10). <strong>DSIP</strong> (delta sleep-inducing peptide) is a nonapeptide first isolated in sleep research.</p><p>Each lot is independently tested in the UK for purity and identity, with the certificate matched to the vial's lot number.</p>" },
+  { id: "hpg", name: "Melanocortin & HPG axis", slug: "melanocortin-hpg-axis-peptides",
+    h1: "Melanocortin & HPG axis research",
+    title: "PT-141 & Kisspeptin-10 Canada | Research Peptides",
+    desc: "PT-141 (bremelanotide) and Kisspeptin-10 for laboratory research. UK-tested lots, shipped from Canada. Prices in CAD.",
+    intro: "<p>This range covers peptides used in research on melanocortin receptors and the hypothalamic-pituitary-gonadal (HPG) axis. <strong>PT-141</strong> (bremelanotide) is a melanocortin-receptor agonist. <strong>Kisspeptin-10</strong> is the shortest active fragment of kisspeptin, studied for its role upstream of GnRH signalling.</p><p>Every lot is independently tested in the UK, and each certificate is published against the lot number on the vial.</p>" },
+  { id: "supplies", name: "Lab supplies", slug: "lab-supplies",
+    h1: "Lab supplies",
+    title: "Bacteriostatic Water Canada | Lab Supplies",
+    desc: "Bacteriostatic water for reconstituting lyophilized research peptides. Free 3 mL vial with every NXT Canada delivery.",
+    intro: "<p>Supplies for reconstituting lyophilized research peptides. Bacteriostatic water is sterile water with 0.9% benzyl alcohol as a preservative, which allows a vial to be used more than once in the lab. A 3 mL vial is included free with every order.</p>" }
 ];
 
 /* price: CAD, from the NXT Canada full product menu. img: optional, falls back to a plain vial. */
