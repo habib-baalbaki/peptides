@@ -228,3 +228,17 @@ footer.site { background: #fff; border-top: 1px solid var(--line); margin-top: 6
 .notice a { color: inherit; font-weight: 600; }
 .newsletter [data-msg] { flex-basis: 100%; margin: 0; font-size: .85rem; opacity: .85; }
 .newsletter [data-msg]:empty { display: none; }
+
+/* product science block: specs, research overview, references, FAQ */
+.pdp-more { max-width: 860px; padding: 8px 0 56px; border-top: 1px solid var(--line); }
+.pdp-more h2 { font-size: 1.45rem; margin: 40px 0 14px; }
+.pdp-more .sci-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px 28px; }
+.pdp-more .sci-card h3 { font-size: 1.05rem; margin: 6px 0 0; }
+.pdp-more .sci-card .specs { margin: 8px 0 6px; }
+.pdp-more .specs td { overflow-wrap: anywhere; }
+.pdp-more .prose p { margin: 0 0 1em; }
+.pdp-more .cite { text-decoration: none; font-size: .78em; }
+.pdp-more .refs-head { font-size: 1rem; margin: 24px 0 8px; }
+.pdp-more .refs { padding-left: 1.3em; color: var(--ink-2); }
+.pdp-more .refs li { margin-bottom: 6px; }
+.pdp-more .ruo { margin-top: 24px; }

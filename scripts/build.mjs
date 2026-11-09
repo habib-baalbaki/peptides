@@ -22,6 +22,7 @@ import vm from "node:vm";
 import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import * as icons from "./lib/icons.mjs";
+import * as SCI from "../content/science.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS = path.join(ROOT, "docs");
@@ -58,6 +59,52 @@ const TODAY = new Date().toISOString().slice(0, 10);
   }
   if (new Set(CATS.map((c) => c.slug)).size !== CATS.length) fail("duplicate category slug");
   if (C.cfAnalyticsToken && !/^[A-Za-z0-9]+$/.test(C.cfAnalyticsToken)) fail("cfAnalyticsToken should be the bare token from the Cloudflare snippet");
+}
+
+/* ---------- product science content (content/science.mjs) ---------- */
+for (const [id, s] of Object.entries(SCI.PRODUCTS)) {
+  if (!P.some((p) => p.id === id)) fail(`content/science.mjs: unknown product "${id}"`);
+  for (const [c] of s.compounds) if (!SCI.COMPOUNDS[c]) fail(`content/science.mjs: ${id} uses unknown compound "${c}"`);
+  for (const para of s.overview) for (const [, k] of para.matchAll(/\[ref:(\w+)\]/g)) if (!SCI.REFS[k]) fail(`content/science.mjs: unknown reference "${k}"`);
+}
+const pendingCompounds = Object.entries(SCI.COMPOUNDS).filter(([, c]) => c.pending).map(([, c]) => c.name);
+
+// Specifications, research overview and FAQ below the buy box. Returns "" for products without content.
+function productScience(p, root) {
+  const s = SCI.PRODUCTS[p.id];
+  if (!s) return "";
+  const order = [];
+  const cite = (k) => { if (!order.includes(k)) order.push(k); const n = order.indexOf(k) + 1; return `<sup><a href="#ref-${n}" class="cite">[${n}]</a></sup>`; };
+  const overview = s.overview.map((para) => `<p>${para.replace(/\s*\[ref:(\w+)\]/g, (_, k) => cite(k))}</p>`).join("");
+  const blend = s.compounds.length > 1;
+  const tables = s.compounds.map(([id, mg]) => {
+    const c = SCI.COMPOUNDS[id];
+    const rows = c.pending
+      ? [["Identity", "Confirmed by mass spectrometry; see the batch certificate of analysis"]]
+      : c.rows;
+    return `<div class="sci-card"><h3>${esc(c.name)}${mg ? ` <span class="muted" style="font-weight:400">${esc(mg)}</span>` : ""}</h3>
+      <table class="specs">${rows.map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join("")}</table>
+      ${c.cid ? `<p class="small muted">Source: <a class="link" href="https://pubchem.ncbi.nlm.nih.gov/compound/${c.cid}" rel="noopener" target="_blank">PubChem CID ${c.cid}</a></p>` : ""}</div>`;
+  }).join("");
+  const refs = order.map((k, i) => {
+    const r = SCI.REFS[k];
+    return `<li id="ref-${i + 1}">${esc(r.cite)} <a class="link" href="https://pubmed.ncbi.nlm.nih.gov/${r.pmid}/" rel="noopener" target="_blank">PubMed ${r.pmid}</a></li>`;
+  }).join("");
+  const faq = s.faq.map((x) => `<details class="faq"><summary>${esc(x.q)}</summary><p>${esc(x.a)}</p></details>`).join("");
+  return `
+  <section class="pdp-more">
+    <h2>${blend ? "Composition &amp; specifications" : "Specifications"}</h2>
+    ${s.composition ? `<p class="muted">${esc(s.composition)}</p>` : ""}
+    <div class="sci-grid">${tables}</div>
+    <h2>Research overview</h2>
+    <div class="prose">${overview}</div>
+    <h3 class="refs-head">References</h3>
+    <ol class="refs small">${refs}</ol>
+    <h2>${esc(p.name)} FAQ</h2>
+    ${faq}
+    <p class="ruo">For laboratory research use only. Not for human or veterinary use. Not authorized by Health Canada. We do not provide dosing or usage guidance.</p>
+  </section>
+`;
 }
 
 /* ---------- compliance guard: phrases that must never appear in titles, descriptions or schema ---------- */
@@ -120,6 +167,17 @@ const organization = {
   sameAs: [C.facebook].filter(Boolean)
 };
 
+function productProperties(p) {
+  const s = SCI.PRODUCTS[p.id];
+  if (!s || s.compounds.length !== 1) return {};
+  const c = SCI.COMPOUNDS[s.compounds[0][0]];
+  if (c.pending || !c.cas) return {};
+  return { additionalProperty: [
+    { "@type": "PropertyValue", name: "CAS number", value: c.cas },
+    { "@type": "PropertyValue", name: "Molecular weight", value: c.mw, unitText: "g/mol" }
+  ] };
+}
+
 function productSchema(p, url) {
   return [
     {
@@ -129,6 +187,7 @@ function productSchema(p, url) {
       image: [imgUrl(p)],
       description: p.desc,
       sku: p.id,
+      ...productProperties(p),
       category: R.catName(p.cat),
       brand: { "@type": "Brand", name: "NXT" },
       offers: {
@@ -235,7 +294,7 @@ function renderPage(html, { file, root, product, category }) {
 
   let graph = null;
   if (opts.schema) {
-    graph = [organization, ...(product ? productSchema(product, url) : []), ...(category ? categorySchema(category, url) : []), ...faqSchema(html, url)];
+    graph = [organization, ...(product ? productSchema(product, url) : []), ...(category ? categorySchema(category, url) : []), ...faqSchema(product ? html + productScience(product, root) : html, url)];
     guard(`${file} JSON-LD`, JSON.stringify(graph));
   }
 
@@ -252,6 +311,7 @@ function renderPage(html, { file, root, product, category }) {
     "lab-name": () => esc(R.labName()),
     "coa-rows": () => R.coaRows(root),
     pdp: () => R.pdp(product, root),
+    "pdp-more": () => productScience(product, root),
     related: () => R.cards(R.related(product), root),
     crumb: () => `<a href="${R.catHref(R.catById(product.cat), root)}">${esc(R.catName(product.cat))}</a> / ${esc(product.name)}`,
     "cat-intro": () => category.intro.replaceAll("{{ROOT}}", root),
@@ -261,7 +321,7 @@ function renderPage(html, { file, root, product, category }) {
   const names = [...html.matchAll(/<!-- nxt:([\w-]+) -->/g)].map((m) => m[1]);
   for (const name of names) {
     if (!GEN[name]) fail(`${file}: unknown region nxt:${name}`);
-    if (["pdp", "related", "crumb"].includes(name) && !product) fail(`${file}: nxt:${name} only works on product pages`);
+    if (["pdp", "pdp-more", "related", "crumb"].includes(name) && !product) fail(`${file}: nxt:${name} only works on product pages`);
     if (["cat-intro", "cat-grid"].includes(name) && !category) fail(`${file}: nxt:${name} only works on category pages`);
     const re = new RegExp(`(<!-- nxt:${name} -->)[\\s\\S]*?(<!-- /nxt:${name} -->)`);
     if (!re.test(html)) fail(`${file}: nxt:${name} has no closing <!-- /nxt:${name} -->`);
@@ -427,6 +487,7 @@ write(LASTMOD_FILE, manifest);
   }
 })("");
 
+if (pendingCompounds.length) console.log(`  note: chemistry hidden until confirmed against the COA: ${pendingCompounds.join(", ")} (content/science.mjs)`);
 if (faqSkipped.length) console.log(`  note: FAQPage schema leaves out ${faqSkipped.length} question(s) with restricted phrases: ${faqSkipped.join(" | ")}`);
 if (!C.cfAnalyticsToken) console.log("  note: no analytics beacon in the HTML (cfAnalyticsToken empty); Cloudflare automatic setup injects it at the edge");
 console.log(`build: ${rootPages.length} pages + ${P.length} product pages + ${CATS.length} category pages, sitemap (${indexable.length} URLs), robots, icons. ${changed ? `${changed} file(s) changed.` : "No changes."}`);
