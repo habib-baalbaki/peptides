@@ -242,3 +242,4 @@ footer.site { background: #fff; border-top: 1px solid var(--line); margin-top: 6
 .pdp-more .refs { padding-left: 1.3em; color: var(--ink-2); }
 .pdp-more .refs li { margin-bottom: 6px; }
 .pdp-more .ruo { margin-top: 24px; }
+.pill.ok { background: #e3f4ea; color: #1d6b3f; }

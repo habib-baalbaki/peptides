@@ -10,6 +10,9 @@
   const C = w.NXT_CONFIG;
   const P = w.NXT_PRODUCTS;
   const CATS = w.NXT_CATEGORIES;
+  const COAS = w.NXT_COAS || {};
+  const coaUrl = (c) => `https://verify.janoshik.com/tests/${c.path}`;
+  const fmtDate = (iso) => new Date(iso + "T12:00:00Z").toLocaleDateString("en-CA", { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" });
 
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const money = (n) => "$" + n.toFixed(2);
@@ -155,7 +158,8 @@
             <tr><th>Ships from</th><td>Canada, via Canada Post Xpresspost with tracking</td></tr>
           </table>
           <div class="coa-box">
-            <div class="row"><strong>Certificate of Analysis</strong><span class="pill">Batch COA pending upload</span></div>
+            ${COAS[p.id] ? `<div class="row"><strong>Certificate of Analysis</strong><span class="pill ok">Verified COA</span></div>
+            <p class="small" style="margin:8px 0 0">Lot ${esc(COAS[p.id].lot)} · tested ${fmtDate(COAS[p.id].date)} · ${esc(COAS[p.id].result)}<br><a class="link" href="${coaUrl(COAS[p.id])}" target="_blank" rel="noopener">View report #${COAS[p.id].task} on Janoshik</a></p>` : `<div class="row"><strong>Certificate of Analysis</strong><span class="pill">Batch COA pending upload</span></div>`}
             <p class="small muted" style="margin:8px 0 0">Tested by: ${esc(lab)}. Lot number on the vial matches the COA. <a class="link" href="${root}lab-results">All lab results</a></p>
           </div>
           <p class="ruo">For laboratory research use only. Not for human or veterinary use. Not authorized by Health Canada. We do not provide dosing or usage guidance.</p>
@@ -171,10 +175,11 @@
         <tr>
           <td><a href="${productHref(p, root)}" style="text-decoration:none;font-weight:500">${esc(p.name)}</a></td>
           <td>${esc(p.size)}</td>
-          <td class="muted">—</td>
-          <td class="muted">—</td>
+          ${COAS[p.id] ? `<td>${esc(COAS[p.id].lot)}</td>
+          <td>${fmtDate(COAS[p.id].date)}</td>` : `<td class="muted">—</td>
+          <td class="muted">—</td>`}
           <td>${esc(lab)}</td>
-          <td><span class="pill">Pending upload</span></td>
+          <td>${COAS[p.id] ? `<a class="link" href="${coaUrl(COAS[p.id])}" target="_blank" rel="noopener">View #${COAS[p.id].task}</a>` : '<span class="pill">Pending upload</span>'}</td>
         </tr>`).join("") + "\n";
   }
 

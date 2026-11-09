@@ -92,7 +92,7 @@ window.NXT_PRODUCTS = [
     desc: "TB-500 is synthetic thymosin beta-4, a 43-amino-acid peptide involved in actin regulation and cell migration. It is studied in experimental models of wound healing, angiogenesis, and recovery from muscle and cardiac injury." },
   { id: "bpc157-tb500", name: "BPC-157 + TB-500", size: "10 mg", price: 70, cat: "blends", cap: "#6b6f76", img: "bpc157-tb500.jpg", best: true,
     tagline: "Two-peptide blend",
-    desc: "A pre-formulated combination of BPC-157 and TB-500 for laboratory research into regenerative and repair pathways. BPC-157 is investigated for tissue and gastrointestinal protection in animal models; TB-500 is synthetic thymosin beta-4, studied for actin regulation and cell migration." },
+    desc: "A pre-formulated combination of BPC-157 and TB-500 for laboratory research into regenerative and repair pathways. BPC-157 is investigated for tissue and gastrointestinal protection in animal models; TB-500 is a thymosin beta-4-derived peptide studied for actin regulation and cell migration." },
   { id: "glow", name: "GLOW", size: "70 mg", price: 100, cat: "blends", cap: "#6a3fb5", img: "glow.jpg", best: true,
     tagline: "GHK-Cu 50 mg + BPC-157 10 mg + TB-500 10 mg",
     desc: "GLOW is a pre-formulated research blend combining GHK-Cu (50 mg), BPC-157 (10 mg) and TB-500 (10 mg), studied for complementary effects on tissue regeneration, collagen synthesis, angiogenesis and inflammation control. GHK-Cu is studied for dermal remodelling and extracellular-matrix signalling; BPC-157 for gastro-protective and soft-tissue repair pathways; TB-500 for cell migration through actin sequestration." },
@@ -151,3 +151,20 @@ window.NXT_PRODUCTS = [
     tagline: "Free with every delivery",
     desc: "Sterile water containing a small amount of preservative (typically 0.9% benzyl alcohol), supplied for multi-use laboratory reconstitution of lyophilized peptides in research settings." }
 ];
+
+/*
+ * Published certificates of analysis (Janoshik Analytical, verify.janoshik.com).
+ * Only list a COA here when the measured amount matches the vial size we sell.
+ * Not listed (amount does not match our listing, checked 2026-11-09):
+ *   BPC-157 #136713 5.34 mg, TB-500 #136721 5.35 mg (5 mg vials; we sell 10 mg),
+ *   GHK-Cu #136717 34.88 mg GHK + 1.43 mg Cu (we sell 50/100 mg), Retatrutide #136720 27.45 mg (we sell 20/40 mg).
+ */
+window.NXT_COAS = {
+  glow: { task: "136712", path: "136712-GLOW_1ZQG6ZWA5UEH", lot: "XN2601HYP", date: "2026-04-27", result: "GHK 46.28 mg · BPC-157 11.15 mg · TB-500 10.72 mg" },
+  klow: { task: "136715", path: "136715-KLOW_96UU1FQXN2S8", lot: "XN2601HYP", date: "2026-04-27", result: "GHK 47.23 mg · BPC-157 11.24 mg · TB-500 11.05 mg · KPV 10.64 mg" },
+  "cjc1295-ipamorelin": { task: "136714", path: "136714-CJC1295_mod_GRF_129_8FXZ38JBFWFK", lot: "XN2601HYP", date: "2026-04-27", result: "CJC-1295 no DAC (mod GRF 1-29) 5.22 mg · Ipamorelin 5.10 mg" },
+  kisspeptin10: { task: "136716", path: "136716-Kisspeptin_5YA55QZPY87T", lot: "XN2601HYP", date: "2026-04-27", result: "11.22 mg · purity 99.929%" },
+  ipamorelin: { task: "136718", path: "136718-Ipamorelin_9VDHPE9D39FU", lot: "XN2601HYP", date: "2026-04-27", result: "5.34 mg · purity 99.788%" },
+  pt141: { task: "136719", path: "136719-PT141_JMCKIBSD38YA", lot: "XN2601HYP", date: "2026-04-27", result: "10.82 mg · purity 99.838%" },
+  ghrp6: { task: "136722", path: "136722-GHRP6_73F4WZEYBUCV", lot: "XN2601HYP", date: "2026-04-27", result: "10.60 mg · purity 99.047%" }
+};

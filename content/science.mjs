@@ -51,6 +51,25 @@ export const COMPOUNDS = {
     ],
     cas: "77591-33-4", mw: "4963", cid: "16132341"
   },
+  // TB-500 inside GLOW and KLOW: Janoshik #136712 and #136715 report "TB-500 (889 Da)", i.e. the
+  // Ac-LKKTETQ fragment (thymosin beta-4 residues 17-23), not the full-length peptide in the TB-500 vial.
+  tb500frag: {
+    name: "TB-500 (fragment)",
+    rows: [
+      ["Identity", "Ac-LKKTETQ, thymosin β4 residues 17–23 (the actin-binding region)"],
+      ["Length", "7 amino acids, N-terminal acetylation"],
+      ["Molecular formula", "C<sub>38</sub>H<sub>68</sub>N<sub>10</sub>O<sub>14</sub>"],
+      ["Molecular weight", "889.0 g/mol (lab result: 889 Da)"],
+      ["CAS number", "885340-08-9"]
+    ],
+    cas: "885340-08-9", mw: "889.0", cid: "62707662"
+  },
+  // TB-500 inside the BPC-157 + TB-500 blend: no certificate yet, so the form is not confirmed.
+  tb500blend: {
+    name: "TB-500",
+    pending: true,
+    rows: []
+  },
   ghkcu: {
     name: "GHK-Cu",
     rows: [
@@ -77,6 +96,8 @@ export const COMPOUNDS = {
 // Reusable overview paragraphs. [ref:key] becomes a numbered citation link.
 const P_BPC = "<strong>BPC-157</strong> is a 15-amino-acid synthetic peptide whose sequence is taken from a larger protein (body protection compound) isolated from gastric juice. Most of the published work is in rodent models of gastrointestinal, tendon, ligament, muscle and bone injury, where it has been studied alongside angiogenic growth-factor signalling [ref:seiwerth2018] [ref:gwyer2019]. A 2025 systematic review found 36 eligible studies, 35 of them preclinical and one clinical, and no clinical safety data [ref:vasireddi2025].";
 const P_TB = "<strong>TB-500</strong> is the research-supply name for synthetic thymosin β4 (Tβ4), a 43-amino-acid peptide present in most cells that binds and sequesters G-actin. The name is also used elsewhere for a short Tβ4 fragment; ours is the full-length peptide, identified by independent lab analysis. Tβ4 has been investigated in experimental models of wound repair, angiogenesis, and corneal and cardiac injury [ref:goldstein2012].";
+const P_TBFRAG = "<strong>TB-500</strong> in this blend is the synthetic fragment Ac-LKKTETQ, residues 17–23 of thymosin β4 (Tβ4), the region of the protein that binds actin (889 Da by independent lab analysis). Full-length Tβ4, a 43-amino-acid G-actin-sequestering peptide, has been investigated in experimental models of wound repair, angiogenesis, and corneal and cardiac injury [ref:goldstein2012].";
+const P_TBGEN = "<strong>TB-500</strong> is a research-supply name used for synthetic thymosin β4 (Tβ4), a 43-amino-acid peptide that binds and sequesters G-actin, and for its short actin-binding fragment Ac-LKKTETQ. Tβ4 has been investigated in experimental models of wound repair, angiogenesis, and corneal and cardiac injury [ref:goldstein2012].";
 const P_GHK = "<strong>GHK-Cu</strong> is the copper(II) complex of the tripeptide Gly-His-Lys, first identified in human plasma. Cell-culture and animal wound-model studies have examined it in relation to collagen and extracellular-matrix synthesis, and gene-expression analyses report that GHK is associated with changes in the expression of a large number of genes [ref:pickart2018].";
 const P_KPV = "<strong>KPV</strong> (Lys-Pro-Val) is the C-terminal tripeptide of alpha-melanocyte-stimulating hormone (α-MSH). In mouse colitis models it was taken up by intestinal epithelial cells through the PepT1 transporter and reduced markers of intestinal inflammation [ref:dalmasso2008].";
 const P_STATUS = "None of these compounds is authorized by Health Canada as a drug. The literature summarised here is preclinical unless stated otherwise, and it is provided as background for laboratory researchers, not as evidence of any effect in people.";
@@ -115,9 +136,9 @@ export const PRODUCTS = {
     ]
   },
   "bpc157-tb500": {
-    compounds: [["bpc157", null], ["tb500", null]],
+    compounds: [["bpc157", null], ["tb500blend", null]],
     composition: "BPC-157 and TB-500, 10 mg total per vial",
-    overview: [P_BPC, P_TB, P_STATUS],
+    overview: [P_BPC, P_TBGEN, P_STATUS],
     faq: [
       { q: "What is in the BPC-157 + TB-500 blend?", a: "Two peptides in one lyophilized vial: BPC-157, a 15-amino-acid gastric-derived peptide, and TB-500, a thymosin β4-derived peptide. The vial contains 10 mg in total." },
       { q: "Why are BPC-157 and TB-500 studied together?", a: "They have been investigated through different mechanisms in tissue-injury models: BPC-157 mostly alongside angiogenic growth-factor signalling, thymosin β4 through actin binding and cell migration. A single vial suits research designs that examine both." },
@@ -125,23 +146,25 @@ export const PRODUCTS = {
     ]
   },
   glow: {
-    compounds: [["ghkcu", "50 mg"], ["bpc157", "10 mg"], ["tb500", "10 mg"]],
+    compounds: [["ghkcu", "50 mg"], ["bpc157", "10 mg"], ["tb500frag", "10 mg"]],
     composition: "GHK-Cu 50 mg + BPC-157 10 mg + TB-500 10 mg (70 mg total)",
-    overview: [P_GHK, P_BPC, P_TB, P_STATUS],
+    overview: [P_GHK, P_BPC, P_TBFRAG, P_STATUS],
     faq: [
       { q: "What is in GLOW?", a: "GLOW is a three-peptide research blend: GHK-Cu (50 mg), BPC-157 (10 mg) and TB-500 (10 mg), 70 mg in one lyophilized vial." },
       { q: "What is the difference between GLOW and KLOW?", a: "KLOW contains everything in GLOW plus 10 mg of KPV, a tripeptide fragment of α-MSH studied in intestinal inflammation models. GLOW has three peptides (70 mg); KLOW has four (80 mg)." },
+      { q: "Which form of TB-500 is in GLOW?", a: "The short fragment Ac-LKKTETQ (thymosin β4 residues 17–23, 889 Da), as reported by Janoshik Analytical for this batch. Our standalone TB-500 vial is full-length thymosin β4." },
       { q: "Why does GLOW look blue?", a: "GHK-Cu is a copper(II) complex, and copper gives the powder and any solution a blue tint. The colour is expected." },
       testingQ("GLOW"), storageQ("GLOW"), statusQ("GLOW")
     ]
   },
   klow: {
-    compounds: [["ghkcu", "50 mg"], ["kpv", "10 mg"], ["bpc157", "10 mg"], ["tb500", "10 mg"]],
+    compounds: [["ghkcu", "50 mg"], ["kpv", "10 mg"], ["bpc157", "10 mg"], ["tb500frag", "10 mg"]],
     composition: "GHK-Cu 50 mg + KPV 10 mg + BPC-157 10 mg + TB-500 10 mg (80 mg total)",
-    overview: [P_GHK, P_KPV, P_BPC, P_TB, P_STATUS],
+    overview: [P_GHK, P_KPV, P_BPC, P_TBFRAG, P_STATUS],
     faq: [
       { q: "What is in KLOW?", a: "KLOW is a four-peptide research blend: GHK-Cu (50 mg), KPV (10 mg), BPC-157 (10 mg) and TB-500 (10 mg), 80 mg in one lyophilized vial." },
       { q: "What is KPV?", a: "KPV (Lys-Pro-Val) is the C-terminal tripeptide of alpha-melanocyte-stimulating hormone. It has been studied in mouse models of intestinal inflammation. Molecular weight 342.4 g/mol, CAS 67727-97-3." },
+      { q: "Which form of TB-500 is in KLOW?", a: "The short fragment Ac-LKKTETQ (thymosin β4 residues 17–23, 889 Da), as reported by Janoshik Analytical for this batch. Our standalone TB-500 vial is full-length thymosin β4." },
       { q: "What is the difference between KLOW and GLOW?", a: "KLOW is GLOW plus 10 mg of KPV. Both contain GHK-Cu, BPC-157 and TB-500 in the same amounts." },
       testingQ("KLOW"), storageQ("KLOW"), statusQ("KLOW")
     ]
