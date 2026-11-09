@@ -17,16 +17,16 @@
   const byId = (id) => P.find((p) => p.id === id);
   const catName = (id) => (CATS.find((c) => c.id === id) || {}).name || "";
   const imgSrc = (p, root = "") => `${root}assets/img/${p.img || "vial.svg"}`;
-  const productHref = (p, root = "") => `${root}products/${p.id}.html`;
-  const catHref = (c, root = "") => (c.slug ? `${root}category/${c.slug}.html` : `${root}shop.html?cat=${c.id}`);
+  const productHref = (p, root = "") => `${root}products/${p.id}`;
+  const catHref = (c, root = "") => (c.slug ? `${root}category/${c.slug}` : `${root}shop?cat=${c.id}`);
   const catById = (id) => CATS.find((c) => c.id === id) || { id, name: "" };
 
   const NAV = [
-    ["shop.html", "Shop", "shop"],
-    ["lab-results.html", "UK Lab Results", "lab"],
-    ["about.html", "About", "about"],
-    ["faq.html", "FAQ", "faq"],
-    ["contact.html", "Contact", "contact"]
+    ["shop", "Shop", "shop"],
+    ["lab-results", "UK Lab Results", "lab"],
+    ["about", "About", "about"],
+    ["faq", "FAQ", "faq"],
+    ["contact", "Contact", "contact"]
   ];
 
   function header(page, root = "") {
@@ -41,10 +41,10 @@
       ${C.pricesArePlaceholders ? '<div class="placeholder-bar">Preview build: prices, shipping terms and lab details are placeholders until confirmed.</div>' : ""}
       <header class="site">
         <div class="container nav">
-          <a class="logo" href="${root}index.html" aria-label="NXT Peptides Canada home">NX/T <small>Canada</small></a>
+          <a class="logo" href="${root || "./"}" aria-label="NXT Peptides Canada home">NX/T <small>Canada</small></a>
           <button class="menu-btn" aria-label="Menu" aria-expanded="false">☰</button>
           <nav class="nav-links" aria-label="Main">${links}</nav>
-          <a class="cart-link" href="${root}cart.html" aria-label="Cart">Cart <span class="cart-count" id="cart-count">0</span></a>
+          <a class="cart-link" href="${root}cart" aria-label="Cart">Cart <span class="cart-count" id="cart-count">0</span></a>
         </div>
       </header>
 `;
@@ -56,24 +56,24 @@
         <div class="container">
           <div class="foot-grid">
             <div>
-              <a class="logo" href="${root}index.html">NX/T <small>Canada</small></a>
+              <a class="logo" href="${root || "./"}">NX/T <small>Canada</small></a>
               <p class="muted small" style="margin-top:10px">${esc(C.tagline)}.<br>${esc(C.domain)} is our only website.</p>
             </div>
             <div><h4>Shop</h4>
-              <a href="${root}shop.html">All products</a>
+              <a href="${root}shop">All products</a>
               ${CATS.slice(0, 4).map((c) => `<a href="${catHref(c, root)}">${esc(c.name)}</a>`).join("")}
             </div>
             <div><h4>Company</h4>
-              <a href="${root}about.html">About NXT Canada</a>
-              <a href="${root}lab-results.html">UK Lab Results</a>
-              <a href="${root}faq.html">FAQ</a>
-              <a href="${root}contact.html">Contact</a>
+              <a href="${root}about">About NXT Canada</a>
+              <a href="${root}lab-results">UK Lab Results</a>
+              <a href="${root}faq">FAQ</a>
+              <a href="${root}contact">Contact</a>
             </div>
             <div><h4>Policies</h4>
-              <a href="${root}policies.html#shipping">Shipping</a>
-              <a href="${root}policies.html#returns">Returns</a>
-              <a href="${root}policies.html#terms">Terms of sale</a>
-              <a href="${root}policies.html#privacy">Privacy</a>
+              <a href="${root}policies#shipping">Shipping</a>
+              <a href="${root}policies#returns">Returns</a>
+              <a href="${root}policies#terms">Terms of sale</a>
+              <a href="${root}policies#privacy">Privacy</a>
             </div>
           </div>
           <div class="foot-legal">
@@ -155,7 +155,7 @@
           </table>
           <div class="coa-box">
             <div class="row"><strong>Certificate of Analysis</strong><span class="pill">Batch COA pending upload</span></div>
-            <p class="small muted" style="margin:8px 0 0">Tested by: ${esc(lab)}. Lot number on the vial matches the COA. <a class="link" href="${root}lab-results.html">All lab results</a></p>
+            <p class="small muted" style="margin:8px 0 0">Tested by: ${esc(lab)}. Lot number on the vial matches the COA. <a class="link" href="${root}lab-results">All lab results</a></p>
           </div>
           <p class="ruo">For laboratory research use only. Not for human or veterinary use. Not authorized by Health Canada. We do not provide dosing or usage guidance.</p>
         </div>

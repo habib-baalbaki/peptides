@@ -38,8 +38,12 @@ for (const file of pages) {
   for (const [, attr, raw] of html.matchAll(/\s(href|src)="([^"]*)"/g)) {
     if (/^(https?:|mailto:|tel:|data:|#|javascript:)/i.test(raw) || raw.includes("${")) continue;
     links++;
-    const target = path.resolve(path.dirname(file), raw.split(/[?#]/)[0] || path.basename(file));
-    if (!target.startsWith(DOCS) || !fs.existsSync(target)) err(`${name}: broken ${attr}="${raw}"`);
+    const bare = raw.split(/[?#]/)[0];
+    if (attr === "href" && /\.html$/.test(bare)) err(`${name}: href="${raw}" uses .html (Cloudflare redirects it; link the clean URL)`);
+    const target = path.resolve(path.dirname(file), bare || path.basename(file));
+    // Cloudflare serves /x from x.html and a directory (or "./", "../") from its index.html
+    const hit = [target, target + ".html", path.join(target, "index.html")].find((c) => fs.existsSync(c) && fs.statSync(c).isFile());
+    if (!target.startsWith(DOCS) || !hit) err(`${name}: broken ${attr}="${raw}"`);
   }
 
   for (const [, json] of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {

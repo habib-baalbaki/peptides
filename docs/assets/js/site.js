@@ -128,7 +128,7 @@
       $("#chips").addEventListener("click", (e) => {
         const b = e.target.closest(".chip"); if (!b) return;
         state.cat = b.dataset.cat;
-        history.replaceState(null, "", state.cat === "all" ? "shop.html" : `shop.html?cat=${state.cat}`);
+        history.replaceState(null, "", state.cat === "all" ? "shop" : `shop?cat=${state.cat}`);
         draw();
       });
       $("#q").addEventListener("input", (e) => { state.q = e.target.value.trim(); draw(); });
@@ -155,7 +155,7 @@
         const items = cart.items();
         const t = totals(), { sub, off, ship } = t;
         if (!items.length) {
-          $("#lines").innerHTML = `<p class="empty">Your cart is empty.<br><br><a class="btn" href="${ROOT}shop.html">Browse products</a></p>`;
+          $("#lines").innerHTML = `<p class="empty">Your cart is empty.<br><br><a class="btn" href="${ROOT}shop">Browse products</a></p>`;
         } else {
           $("#lines").innerHTML = items.map((i) => {
             const p = byId(i.id);

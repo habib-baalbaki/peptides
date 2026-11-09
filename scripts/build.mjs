@@ -367,6 +367,17 @@ function write(abs, content) {
   console.log(`  wrote ${path.relative(ROOT, abs).replace(/\\/g, "/")}`);
 }
 
+// Internal links use clean URLs (/shop, /products/bpc157, ../): Cloudflare 307-redirects x.html to /x,
+// and every .html link would show up in Search Console as "Page with redirect".
+function cleanLinks(html) {
+  return html.replace(/(\shref=")((?:\.\.\/)*)([^":?#]*?)\.html([?#][^"]*)?"/g, (m, pre, up, p, rest = "") => {
+    if (p === "index") return `${pre}${up || "./"}${rest}"`;
+    if (p.endsWith("/index")) return `${pre}${up}${p.slice(0, -5)}${rest}"`;
+    return `${pre}${up}${p}${rest}"`;
+  });
+}
+for (const [file, c] of outputs) if (file.endsWith(".html") && typeof c === "string") outputs.set(file, cleanLinks(c));
+
 for (const [file, content] of outputs) {
   write(rel(file), content);
   write(path.join(DOCS, file), content);
