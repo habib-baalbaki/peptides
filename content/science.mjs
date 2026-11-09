@@ -38,10 +38,18 @@ export const COMPOUNDS = {
   },
   tb500: {
     name: "TB-500",
-    // PubChem's "TB-500" (CID 62707662) is Ac-LKKTETQ, MW 889.0. Some suppliers sell full-length
-    // thymosin beta-4 (43 aa, MW ~4963, CID 45382195) under the same name. Confirm against the COA MW.
-    pending: true,
-    rows: []
+    // Our TB-500 is full-length thymosin beta-4: Janoshik test #136721 (batch XN2601HYP) identifies the
+    // sample as "TB-500 (TB4)". Sequence: UniProt P62328 (chain 2-44, N-acetylserine).
+    // Not PubChem's "TB-500" entry (CID 62707662), which is the Ac-LKKTETQ fragment, MW 889.0.
+    rows: [
+      ["Identity", "Thymosin β4 (Tβ4), full length; INN timbetasin"],
+      ["Sequence", "Ac-SDKPDMAEIEKFDKSKLKKTETQEKNPLPSKETIEQEKQAGES"],
+      ["Length", "43 amino acids, N-terminal acetylation"],
+      ["Molecular formula", "C<sub>212</sub>H<sub>350</sub>N<sub>56</sub>O<sub>78</sub>S"],
+      ["Molecular weight", "≈ 4963 g/mol"],
+      ["CAS number", "77591-33-4"]
+    ],
+    cas: "77591-33-4", mw: "4963", cid: "16132341"
   },
   ghkcu: {
     name: "GHK-Cu",
@@ -68,7 +76,7 @@ export const COMPOUNDS = {
 
 // Reusable overview paragraphs. [ref:key] becomes a numbered citation link.
 const P_BPC = "<strong>BPC-157</strong> is a 15-amino-acid synthetic peptide whose sequence is taken from a larger protein (body protection compound) isolated from gastric juice. Most of the published work is in rodent models of gastrointestinal, tendon, ligament, muscle and bone injury, where it has been studied alongside angiogenic growth-factor signalling [ref:seiwerth2018] [ref:gwyer2019]. A 2025 systematic review found 36 eligible studies, 35 of them preclinical and one clinical, and no clinical safety data [ref:vasireddi2025].";
-const P_TB = "<strong>TB-500</strong> is the research-supply name for a synthetic peptide derived from thymosin β4 (Tβ4), a 43-amino-acid protein present in most cells that binds and sequesters G-actin. Tβ4 has been investigated in experimental models of wound repair, angiogenesis, and corneal and cardiac injury [ref:goldstein2012].";
+const P_TB = "<strong>TB-500</strong> is the research-supply name for synthetic thymosin β4 (Tβ4), a 43-amino-acid peptide present in most cells that binds and sequesters G-actin. The name is also used elsewhere for a short Tβ4 fragment; ours is the full-length peptide, identified by independent lab analysis. Tβ4 has been investigated in experimental models of wound repair, angiogenesis, and corneal and cardiac injury [ref:goldstein2012].";
 const P_GHK = "<strong>GHK-Cu</strong> is the copper(II) complex of the tripeptide Gly-His-Lys, first identified in human plasma. Cell-culture and animal wound-model studies have examined it in relation to collagen and extracellular-matrix synthesis, and gene-expression analyses report that GHK is associated with changes in the expression of a large number of genes [ref:pickart2018].";
 const P_KPV = "<strong>KPV</strong> (Lys-Pro-Val) is the C-terminal tripeptide of alpha-melanocyte-stimulating hormone (α-MSH). In mouse colitis models it was taken up by intestinal epithelial cells through the PepT1 transporter and reduced markers of intestinal inflammation [ref:dalmasso2008].";
 const P_STATUS = "None of these compounds is authorized by Health Canada as a drug. The literature summarised here is preclinical unless stated otherwise, and it is provided as background for laboratory researchers, not as evidence of any effect in people.";
@@ -101,8 +109,8 @@ export const PRODUCTS = {
     compounds: [["tb500", "10 mg"]],
     overview: [P_TB, P_STATUS],
     faq: [
-      { q: "What is TB-500?", a: "TB-500 is the research-supply name for a synthetic peptide derived from thymosin β4, a 43-amino-acid actin-binding protein. Thymosin β4 has been studied in experimental models of wound repair and angiogenesis." },
-      { q: "Is TB-500 the same as thymosin β4?", a: "Not always. The name is used for both a short synthetic fragment of thymosin β4 and for the full-length protein. Check the molecular weight on the batch certificate of analysis to see exactly which molecule a vial contains." },
+      { q: "What is TB-500?", a: "TB-500 is the research-supply name for synthetic thymosin β4, a 43-amino-acid actin-binding peptide (molecular weight about 4963 g/mol, CAS 77591-33-4). Thymosin β4 has been studied in experimental models of wound repair and angiogenesis." },
+      { q: "Is TB-500 the same as thymosin β4?", a: "It depends on the supplier. Some sell a short seven-amino-acid fragment of thymosin β4 (Ac-LKKTETQ, about 889 g/mol) under the name TB-500. Ours is full-length thymosin β4, as identified by independent lab analysis of the batch." },
       testingQ("TB-500"), storageQ("TB-500"), statusQ("TB-500")
     ]
   },
