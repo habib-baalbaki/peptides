@@ -87,7 +87,7 @@ const storageQ = (name) => ({
 });
 const testingQ = (name) => ({
   q: `How is each lot of ${name} tested?`,
-  a: `Every lot is tested by an independent UK laboratory for purity (HPLC) and identity (mass spectrometry). The lot number printed on the vial matches the certificate of analysis on our lab results page.`
+  a: `Every lot is tested by an independent laboratory (Janoshik Analytical) for purity (HPLC) and identity (mass spectrometry). The lot number printed on the vial matches the certificate of analysis on our lab results page.`
 });
 const statusQ = (name) => ({
   q: `Is ${name} approved for use in people?`,

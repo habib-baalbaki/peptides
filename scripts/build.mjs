@@ -139,11 +139,11 @@ function ogImage(p) {
 }
 
 /* ---------- product page copy ---------- */
-const productTitle = (p) => `${p.name} ${p.size} | ${p.cat === "supplies" ? "Research Lab Supplies" : "UK-Tested Research Peptide"} | ${C.brand}`;
+const productTitle = (p) => `${p.name} ${p.size} | ${p.cat === "supplies" ? "Research Lab Supplies" : "Third-Party Tested Research Peptide"} | ${C.brand}`;
 
 function productDescription(p, max = 155) {
   const lead = `${p.name} ${p.size}: ${p.tagline.replace(/\.$/, "")}. `;
-  const tail = p.cat === "supplies" ? " For laboratory research use only." : " UK-tested. For research use only.";
+  const tail = p.cat === "supplies" ? " For laboratory research use only." : " Third-party tested. For research use only.";
   let body = p.desc.split(/(?<=\.)\s+/)[0];
   const room = max - lead.length - tail.length;
   if (body.length > room) {

@@ -23,7 +23,7 @@
 
   const NAV = [
     ["shop", "Shop", "shop"],
-    ["lab-results", "UK Lab Results", "lab"],
+    ["lab-results", "Lab Results", "lab"],
     ["about", "About", "about"],
     ["faq", "FAQ", "faq"],
     ["contact", "Contact", "contact"]
@@ -36,7 +36,7 @@
         <span>New customers: ${C.firstOrderDiscount * 100}% off your first order</span>
         <span>Free shipping over ${money(C.freeShippingThreshold)} ${C.currency}</span>
         <span>Free 3 mL BAC water with every delivery</span>
-        <span>UK-tested &amp; validated</span>
+        <span>Third-party tested by Janoshik</span>
       </div>
       ${C.pricesArePlaceholders ? '<div class="placeholder-bar">Preview build: prices, shipping terms and lab details are placeholders until confirmed.</div>' : ""}
       <header class="site">
@@ -65,7 +65,7 @@
             </div>
             <div><h4>Company</h4>
               <a href="${root}about">About NXT Canada</a>
-              <a href="${root}lab-results">UK Lab Results</a>
+              <a href="${root}lab-results">Lab Results</a>
               <a href="${root}faq">FAQ</a>
               <a href="${root}contact">Contact</a>
             </div>
@@ -78,7 +78,7 @@
           </div>
           <div class="foot-legal">
             <p><strong>For laboratory research use only.</strong> Products are not for human or veterinary use, and not intended to diagnose, treat, cure or prevent any disease. Products have not been authorized by Health Canada. We do not provide dosing, usage or medical advice. Purchasers must be 18+.</p>
-            <p>Products are manufactured in a GMP-compliant facility and independently tested in the UK. NXT Peptides Canada is a Canadian-based company. © ${year} NXT Peptides Canada.</p>
+            <p>Products are manufactured in a GMP-compliant facility and independently tested by Janoshik Analytical. NXT Peptides Canada is a Canadian-based company. © ${year} NXT Peptides Canada.</p>
           </div>
         </div>
       </footer>
@@ -127,7 +127,7 @@
   }
 
   function pdp(p, root = "") {
-    const lab = C.ukLabName || "Independent UK laboratory (name to be confirmed)";
+    const lab = C.ukLabName || "Independent laboratory";
     return `
         <div class="pdp-img"><img src="${imgSrc(p, root)}" alt="${esc(p.name)} ${esc(p.size)} vial" width="440" height="550" style="width:100%"></div>
         <div>
@@ -148,9 +148,10 @@
           <table class="specs">
             <tr><th>Contents</th><td>${esc(p.size)}${p.cat === "supplies" ? "" : ", lyophilized powder"}</td></tr>
             <tr><th>Purity</th><td>≥99% (HPLC), see batch COA</td></tr>
-            <tr><th>Testing</th><td>Independently tested &amp; validated in the UK (HPLC + MS)</td></tr>
+            <tr><th>Testing</th><td>Independently tested by Janoshik Analytical (HPLC + MS)</td></tr>
             <tr><th>Manufacturing</th><td>GMP-compliant facility</td></tr>
             <tr><th>Storage</th><td>Store lyophilized vials refrigerated (2–8 °C), away from light</td></tr>
+            <tr><th>Sourced from</th><td>NXT, a UK-based supplier</td></tr>
             <tr><th>Ships from</th><td>Canada, via Canada Post Xpresspost with tracking</td></tr>
           </table>
           <div class="coa-box">
@@ -162,7 +163,7 @@
 `;
   }
 
-  const labName = () => C.ukLabName || "UK laboratory (to be confirmed)";
+  const labName = () => C.ukLabName || "Independent laboratory";
 
   function coaRows(root = "") {
     const lab = labName();
