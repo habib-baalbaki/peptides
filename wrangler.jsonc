@@ -1,4 +1,4 @@
-// Cloudflare Workers: serve the static site in docs/, plus the /api/* Worker (orders, newsletter).
+// Cloudflare Workers: serve the static site in docs/, plus the Worker (orders, newsletter, 301 redirects).
 // Setup steps: README.md, "Orders & newsletter backend".
 {
 	"name": "peptides",
@@ -7,8 +7,10 @@
 	"assets": {
 		"directory": "./docs",
 		"binding": "ASSETS",
+		// the Worker runs first for pages (redirects in worker/redirects.js); static files skip it
 		"run_worker_first": [
-			"/api/*"
+			"/*",
+			"!/assets/*"
 		]
 	},
 	"d1_databases": [

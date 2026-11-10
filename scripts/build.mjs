@@ -451,6 +451,7 @@ write(rel("worker/catalogue.js"), [
     firstOrderDiscount: C.firstOrderDiscount, flatShipping: C.flatShipping, taxRates: C.taxRates, wallets: C.wallets || {}
   }, null, 2)};`,
   `export const PRODUCTS = ${JSON.stringify(Object.fromEntries(P.map((p) => [p.id, { name: p.name, size: p.size, price: p.price }])), null, 2)};`,
+  `export const CATEGORIES = ${JSON.stringify(Object.fromEntries(CATS.filter((c) => c.slug).map((c) => [c.id, c.slug])), null, 2)};`,
   ""
 ].join("\n"));
 

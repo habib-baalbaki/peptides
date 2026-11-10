@@ -138,3 +138,13 @@ export const PRODUCTS = {
     "price": 0
   }
 };
+export const CATEGORIES = {
+  "repair": "tissue-repair-research-peptides",
+  "blends": "research-peptide-blends",
+  "gh": "gh-secretagogue-peptides",
+  "metabolic": "metabolic-research-peptides",
+  "longevity": "mitochondrial-longevity-research-peptides",
+  "neuro": "neuropeptide-research",
+  "hpg": "melanocortin-hpg-axis-peptides",
+  "supplies": "lab-supplies"
+};

@@ -1,7 +1,8 @@
 /*
  * NXT Peptides Canada: API Worker.
- * Static pages are served from docs/ by the assets binding; only /api/* reaches this code
- * (see run_worker_first in wrangler.jsonc).
+ * Static pages are served from docs/ by the assets binding. Every request except /assets/* runs this
+ * code first (run_worker_first in wrangler.jsonc) so old URLs get a 301 to their canonical page
+ * (worker/redirects.js) before the asset lookup.
  *
  *   POST /api/order       store an order (totals recomputed here) and email the owner
  *   POST /api/subscribe   store a newsletter signup
@@ -11,6 +12,7 @@
  */
 import { EmailMessage } from "cloudflare:email";
 import { CONFIG, PRODUCTS } from "./catalogue.js";
+import { redirectFor } from "./redirects.js";
 
 const MAX_BODY = 10_000;
 const PROVINCES = Object.keys(CONFIG.taxRates);
@@ -33,6 +35,10 @@ export default {
       if (url.pathname === "/api/subscribe" && request.method === "POST") return await subscribe(request, env);
       if (url.pathname === "/api/admin/export" && request.method === "GET") return await exportCsv(request, env, url);
       if (url.pathname.startsWith("/api/")) return json({ error: "Not found" }, 404);
+      if (request.method === "GET" || request.method === "HEAD") {
+        const to = redirectFor(url);
+        if (to) return Response.redirect(new URL(to, url.origin).toString(), 301);
+      }
       return env.ASSETS.fetch(request);
     } catch (e) {
       console.error(e);
