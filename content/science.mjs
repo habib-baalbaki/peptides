@@ -9,6 +9,10 @@
  * - A compound with pending: true shows no chemistry until its identity is confirmed against the supplier COA.
  */
 
+import { P_STATUS, storageQ, testingQ, statusQ } from "./science-shared.mjs";
+import * as GH from "./science-gh.mjs";
+import * as HPG from "./science-hpg.mjs";
+
 export const REFS = {
   seiwerth2018: { pmid: "29998800", doi: "10.2174/1381612824666180712110447",
     cite: "Seiwerth S, Rucman R, Turkovic B, et al. BPC 157 and standard angiogenic growth factors. Gastrointestinal tract healing, lessons from tendon, ligament, muscle and bone healing. Curr Pharm Des. 2018." },
@@ -100,21 +104,6 @@ const P_TBFRAG = "<strong>TB-500</strong> in this blend is the synthetic fragmen
 const P_TBGEN = "<strong>TB-500</strong> is a research-supply name used for synthetic thymosin β4 (Tβ4), a 43-amino-acid peptide that binds and sequesters G-actin, and for its short actin-binding fragment Ac-LKKTETQ. Tβ4 has been investigated in experimental models of wound repair, angiogenesis, and corneal and cardiac injury [ref:goldstein2012].";
 const P_GHK = "<strong>GHK-Cu</strong> is the copper(II) complex of the tripeptide Gly-His-Lys, first identified in human plasma. Cell-culture and animal wound-model studies have examined it in relation to collagen and extracellular-matrix synthesis, and gene-expression analyses report that GHK is associated with changes in the expression of a large number of genes [ref:pickart2018].";
 const P_KPV = "<strong>KPV</strong> (Lys-Pro-Val) is the C-terminal tripeptide of alpha-melanocyte-stimulating hormone (α-MSH). In mouse colitis models it was taken up by intestinal epithelial cells through the PepT1 transporter and reduced markers of intestinal inflammation [ref:dalmasso2008].";
-const P_STATUS = "None of these compounds is authorized by Health Canada as a drug. The literature summarised here is preclinical unless stated otherwise, and it is provided as background for laboratory researchers, not as evidence of any effect in people.";
-
-const storageQ = (name) => ({
-  q: `How should lyophilized ${name} be stored?`,
-  a: `Keep sealed vials refrigerated at 2–8 °C, dry and away from light. For storage longer than a few months, many laboratories keep lyophilized peptides frozen at −20 °C. Let the vial reach room temperature before opening to limit moisture uptake.`
-});
-const testingQ = (name) => ({
-  q: `How is each lot of ${name} tested?`,
-  a: `Every lot is tested by an independent laboratory (Janoshik Analytical) for purity (HPLC) and identity (mass spectrometry). The lot number printed on the vial matches the certificate of analysis on our lab results page.`
-});
-const statusQ = (name) => ({
-  q: `Is ${name} approved for use in people?`,
-  a: `No. ${name} is not authorized by Health Canada or the US FDA as a drug. It is sold strictly for in-vitro and laboratory research. We do not provide dosing, administration or usage guidance.`
-});
-
 export const PRODUCTS = {
   bpc157: {
     compounds: [["bpc157", "10 mg"]],
@@ -170,3 +159,13 @@ export const PRODUCTS = {
     ]
   }
 };
+
+// Extra batches live in their own files so they can be written in parallel.
+for (const m of [GH, HPG]) {
+  for (const [obj, add] of [[REFS, m.REFS], [COMPOUNDS, m.COMPOUNDS], [PRODUCTS, m.PRODUCTS]]) {
+    for (const k of Object.keys(add || {})) {
+      if (k in obj) throw new Error(`content: duplicate key "${k}"`);
+      obj[k] = add[k];
+    }
+  }
+}
