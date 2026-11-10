@@ -12,6 +12,7 @@
 import { P_STATUS, storageQ, testingQ, statusQ } from "./science-shared.mjs";
 import * as GH from "./science-gh.mjs";
 import * as HPG from "./science-hpg.mjs";
+import * as MITO from "./science-mito.mjs";
 
 export const REFS = {
   seiwerth2018: { pmid: "29998800", doi: "10.2174/1381612824666180712110447",
@@ -161,7 +162,7 @@ export const PRODUCTS = {
 };
 
 // Extra batches live in their own files so they can be written in parallel.
-for (const m of [GH, HPG]) {
+for (const m of [GH, HPG, MITO]) {
   for (const [obj, add] of [[REFS, m.REFS], [COMPOUNDS, m.COMPOUNDS], [PRODUCTS, m.PRODUCTS]]) {
     for (const k of Object.keys(add || {})) {
       if (k in obj) throw new Error(`content: duplicate key "${k}"`);
