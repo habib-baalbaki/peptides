@@ -38,6 +38,7 @@ sandbox.window = sandbox;
 vm.createContext(sandbox);
 for (const f of ["assets/js/data.js", "assets/js/render.js"]) vm.runInContext(readText(rel(f)), sandbox, { filename: f });
 const { NXT_CONFIG: C, NXT_PRODUCTS: P, NXT_CATEGORIES: CATS, NXT_RENDER: R } = sandbox;
+const COAS = sandbox.NXT_COAS || {};
 const { esc } = R;
 
 const SITE = `https://${C.domain}`;
@@ -139,11 +140,30 @@ function ogImage(p) {
 }
 
 /* ---------- product page copy ---------- */
-const productTitle = (p) => `${p.name} ${p.size} | ${p.cat === "supplies" ? "Research Lab Supplies" : "Third-Party Tested Research Peptide"} | ${C.brand}`;
+// search titles: keyword + "Canada" first; "with COA" only when a matching certificate is published
+const productTitle = (p) => `${p.name} ${p.size} Canada | ${p.cat === "supplies" ? "Research Lab Supplies" : COAS[p.id] ? "Research Peptide with COA" : "Third-Party Tested Peptide"} | NXT`;
 
 function productDescription(p, max = 155) {
-  const lead = `${p.name} ${p.size}: ${p.tagline.replace(/\.$/, "")}. `;
-  const tail = p.cat === "supplies" ? " For laboratory research use only." : " Third-party tested. For research use only.";
+  if (p.cat !== "supplies") {
+    const coa = COAS[p.id];
+    const purity = coa && (coa.result.match(/purity ([\d.]+)%/) || [])[1];
+    // [text, drop order]: 0 = always kept; higher numbers are dropped first when over the limit
+    let parts = [
+      [`Buy ${p.name} ${p.size} in Canada.`, 0],
+      [`${p.tagline.replace(/\.$/, "")} for laboratory research.`, 1],
+      [coa ? (purity ? `Janoshik COA: ${(+purity).toFixed(2)}% purity.` : "Janoshik COA published.") : "Independently tested by Janoshik Analytical.", 0],
+      ["Tracked shipping, prices in CAD.", 2],
+      ["Research use only.", 0]
+    ];
+    const text = () => parts.map(([t]) => t).join(" ");
+    while (text().length > max && parts.some(([, d]) => d)) {
+      const worst = Math.max(...parts.map(([, d]) => d));
+      parts = parts.filter(([, d]) => d !== worst);
+    }
+    return text();
+  }
+  const lead = `${p.name} ${p.size} in Canada: ${p.tagline.replace(/\.$/, "")}. `;
+  const tail = " For laboratory research use only.";
   let body = p.desc.split(/(?<=\.)\s+/)[0];
   const room = max - lead.length - tail.length;
   if (body.length > room) {
@@ -364,7 +384,7 @@ const catTemplate = readText(rel("templates/category.html"));
 for (const c of CATS) {
   const file = `category/${c.slug}.html`;
   guard(`${file} intro`, c.intro);
-  const title = `${c.title} | ${C.brand}`.length <= 75 ? `${c.title} | ${C.brand}` : c.title;
+  const title = c.title;
   let html = catTemplate
     .replaceAll("{{ROOT}}", "../")
     .replaceAll("{{TITLE}}", esc(title))
