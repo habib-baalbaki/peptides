@@ -1,0 +1,181 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="shared/style.css">
+<style>
+  .q { text-align: left; transform: none !important; font-size: 32px; font-weight: 600; }
+  .q small { text-align: left; font-size: 21px; margin-top: 2px; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="chapter"><b>07</b>Where peptides show up today</div>
+<div class="label q" id="q0" style="color: var(--amber)">Metabolic medicine<small>Insulin · GLP-1 receptor agonists</small><span class="tag">Approved medicines</span></div>
+<div class="label q" id="q1" style="color: var(--coral)">Tissue-repair research<small>BPC-157 · Thymosin β-4</small><span class="tag">Cell &amp; animal studies</span></div>
+<div class="label q" id="q2" style="color: var(--violet)">Endocrine research<small>CJC-1295 · Ipamorelin</small><span class="tag">Research compounds</span></div>
+<div class="label q" id="q3" style="color: var(--cyan)">Skin biology<small>GHK-Cu copper peptide</small><span class="tag">Laboratory studies</span></div>
+<div id="fade"></div>
+<script type="module">
+import { W, H, C, canvas, duration, background, sphere, bond, rng, seg, ease, easeOut, lerp, rgba, shade, place, inOut, frameFade, fontsReady, clamp, warp } from "./shared/lib.js";
+
+const D = duration(73);
+const T = warp([[0, 0], [3, 3.7], [17, 20.7], [35, 43.6], [45, 57.4], [57, 71], [60, 73]]);
+const ctx = canvas();
+const $ = (id) => document.getElementById(id);
+
+// when each quadrant is spoken about
+const SPANS = [[3, 17], [17, 35], [35, 45], [45, 57]].map(([a, b]) => [T(a), T(b)]);
+const QW = 900, QH = 470;
+const ORIG = [[50, 120], [970, 120], [50, 600], [970, 600]];
+
+/* ---------- 1 · metabolic ---------- */
+const R1 = rng(71);
+const ISLET = Array.from({ length: 16 }, (_, i) => { const a = i * 2.4, d = 30 + Math.sqrt(i) * 34; return { x: 290 + Math.cos(a) * d, y: 290 + Math.sin(a) * d * 0.8, r: 26 + R1() * 6 }; });
+const INS = Array.from({ length: 60 }, (_, i) => ({ b: i * 0.18, a: (R1() - 0.5) * 1.6, sp: 50 + R1() * 60 }));
+const GLU = Array.from({ length: 14 }, () => ({ x: 560 + R1() * 300, y: 170 + R1() * 260, ph: R1() * 6 }));
+function metabolic(t) {
+  for (const c of ISLET) sphere(ctx, c.x, c.y, c.r, C.amber, 0.85, 0.25);
+  for (const p of INS) {
+    const age = t - 2 - p.b; if (age < 0 || age > 6) continue;
+    sphere(ctx, 330 + Math.cos(p.a) * p.sp * age, 290 + Math.sin(p.a) * p.sp * age, 6, C.amber, clamp(1.2 - age / 6), 1.2);
+  }
+  const fade = seg(t, 4, 12);
+  GLU.forEach((g, i) => {
+    const a = i / GLU.length < 1 - fade * 0.8 ? 0.7 : 0.12;
+    ctx.save(); ctx.globalAlpha *= a; ctx.strokeStyle = C.white; ctx.lineWidth = 3;
+    ctx.beginPath(); for (let j = 0; j < 6; j++) { const an = Math.PI / 3 * j + t * 0.3 + g.ph; ctx.lineTo(g.x + Math.cos(an) * 14, g.y + Math.sin(g.ph + t * 0.5) * 10 + Math.sin(an) * 14); } ctx.closePath(); ctx.stroke(); ctx.restore();
+  });
+  // a GLP-1 agonist docking on the islet
+  const d = ease(seg(t, 5, 8));
+  const x = lerp(120, 205, d), y = lerp(110, 210, d);
+  const pts = Array.from({ length: 6 }, (_, i) => ({ x: x - i * 20, y: y - i * 10 + Math.sin(t * 3 + i) * 3 }));
+  for (let i = 1; i < 6; i++) bond(ctx, pts[i - 1].x, pts[i - 1].y, pts[i].x, pts[i].y, 3, C.cyan, 0.9);
+  for (const p of pts) sphere(ctx, p.x, p.y, 9, C.cyan, 1, 0.9);
+}
+
+/* ---------- 2 · tissue-repair research ---------- */
+const BR = [];
+(function grow(x, y, ang, len, depth, born) {
+  const x2 = x + Math.cos(ang) * len, y2 = y + Math.sin(ang) * len;
+  BR.push({ x, y, x2, y2, depth, born });
+  if (depth >= 5) return;
+  const r = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453; const f = r - Math.floor(r);
+  grow(x2, y2, ang - 0.45 - f * 0.25, len * 0.74, depth + 1, born + 1);
+  grow(x2, y2, ang + 0.4 + f * 0.25, len * 0.7, depth + 1, born + 1.1);
+})(0, 0, -Math.PI / 2, 110, 0, 0);
+function repair(t) {
+  // parent vessel
+  ctx.lineCap = "round";
+  ctx.strokeStyle = shade(C.red, -0.1, 0.9); ctx.lineWidth = 34;
+  ctx.beginPath(); ctx.moveTo(40, 420); ctx.lineTo(560, 420); ctx.stroke();
+  for (const base of [170, 420]) {
+    for (const b of BR) {
+      const g = clamp((t - 1.5) * 0.7 - b.born * 0.9);
+      if (g <= 0) continue;
+      ctx.strokeStyle = rgba(C.amber, 0.85); ctx.lineWidth = Math.max(2, 14 - b.depth * 2.4);
+      ctx.shadowColor = rgba(C.amber, 0.7); ctx.shadowBlur = 16;
+      ctx.beginPath(); ctx.moveTo(base + b.x, 405 + b.y); ctx.lineTo(base + lerp(b.x, b.x2, g), 405 + lerp(b.y, b.y2, g)); ctx.stroke();
+    }
+  }
+  ctx.shadowBlur = 0;
+  // tendon fibres drawing together
+  const close = ease(seg(t, 6, 14));
+  for (let i = 0; i < 9; i++) {
+    const y = 160 + i * 32, gap = 60 * (1 - close);
+    ctx.strokeStyle = rgba(C.coral, 0.6); ctx.lineWidth = 6;
+    ctx.beginPath(); ctx.moveTo(620, y); for (let x = 620; x < 740 - gap / 2; x += 10) ctx.lineTo(x, y + Math.sin(x / 18 + i) * 4); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(740 + gap / 2, y); for (let x = 740 + gap / 2; x < 880; x += 10) ctx.lineTo(x, y + Math.sin(x / 18 + i) * 4); ctx.stroke();
+  }
+}
+
+/* ---------- 3 · endocrine research ---------- */
+function endocrine(t) {
+  const P = 2.6; // a pulse every P seconds
+  // pituitary
+  ctx.strokeStyle = rgba(C.violet, 0.7); ctx.lineWidth = 16; ctx.lineCap = "round";
+  ctx.beginPath(); ctx.moveTo(250, 80); ctx.quadraticCurveTo(240, 160, 250, 210); ctx.stroke();
+  const pulse = Math.pow(Math.max(0, Math.cos(((t % P) / P) * Math.PI * 2)), 12);
+  const g = ctx.createRadialGradient(240, 290, 10, 250, 300, 110);
+  g.addColorStop(0, shade(C.violet, 0.3 + pulse * 0.4)); g.addColorStop(1, shade(C.violet, -0.6));
+  ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(250, 300, 110, 90, 0, 0, 7); ctx.fill();
+  for (let n = 0; n < 8; n++) {
+    const age = t - n * P; if (age < 0 || age > 2.4) continue;
+    ctx.strokeStyle = rgba(C.violet, 0.6 * (1 - age / 2.4)); ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.ellipse(250, 300, 110 + age * 90, 90 + age * 75, 0, 0, 7); ctx.stroke();
+  }
+  // level over time: pulses
+  ctx.strokeStyle = "rgba(255,255,255,.25)"; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(500, 420); ctx.lineTo(880, 420); ctx.moveTo(500, 420); ctx.lineTo(500, 160); ctx.stroke();
+  const shown = clamp(t / 9);
+  ctx.strokeStyle = C.violet; ctx.lineWidth = 4; ctx.shadowColor = rgba(C.violet, 0.8); ctx.shadowBlur = 14;
+  ctx.beginPath();
+  for (let x = 0; x <= 380 * shown; x += 3) {
+    const tt = (x / 380) * 9;
+    const v = Math.pow(Math.max(0, Math.cos(((tt % P) / P) * Math.PI * 2)), 12);
+    ctx.lineTo(500 + x, 410 - v * 230 - 6);
+  }
+  ctx.stroke(); ctx.shadowBlur = 0;
+}
+
+/* ---------- 4 · skin biology ---------- */
+function skin(t) {
+  // fibroblast
+  const g = ctx.createRadialGradient(220, 300, 10, 230, 300, 160);
+  g.addColorStop(0, rgba(C.cyan, 0.35)); g.addColorStop(1, rgba(C.cyan, 0.06));
+  ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(230, 300, 170, 70, -0.15, 0, 7); ctx.fill();
+  ctx.strokeStyle = rgba(C.cyan, 0.5); ctx.lineWidth = 2; ctx.stroke();
+  sphere(ctx, 230, 300, 30, C.blue, 0.8, 0.3);
+  // GHK-Cu: three residues around a copper ion
+  const d = ease(seg(t, 1, 4));
+  const gx = lerp(120, 300, d), gy = lerp(120, 205, d);
+  const tri = [[-26, 14], [0, -26], [26, 14]].map(([x, y]) => ({ x: gx + x, y: gy + y }));
+  for (const p of tri) bond(ctx, p.x, p.y, gx, gy, 3, C.blue, 0.8);
+  bond(ctx, tri[0].x, tri[0].y, tri[1].x, tri[1].y, 4, C.white, 0.8); bond(ctx, tri[1].x, tri[1].y, tri[2].x, tri[2].y, 4, C.white, 0.8);
+  for (const p of tri) sphere(ctx, p.x, p.y, 11, C.cyan, 1, 0.8);
+  sphere(ctx, gx, gy, 13, C.blue, 1, 1.6);
+  // collagen and elastin fibres being laid down
+  const L = clamp((t - 4) / 7);
+  for (let s = 0; s < 3; s++) {
+    ctx.strokeStyle = s === 2 ? rgba(C.amber, 0.7) : rgba(C.white, 0.6); ctx.lineWidth = 4;
+    const y0 = 250 + s * 50;
+    for (const ph of [0, 2.1, 4.2]) {
+      ctx.beginPath();
+      for (let x = 400; x <= 400 + 480 * L; x += 6) ctx.lineTo(x, y0 + Math.sin(x / 22 + ph + s) * 9);
+      ctx.stroke();
+    }
+  }
+}
+const DRAW = [metabolic, repair, endocrine, skin];
+
+window.film = {
+  duration: D,
+  ready: fontsReady(),
+  frame(t) {
+    background(ctx, t, 29, C.cyan);
+    for (let q = 0; q < 4; q++) {
+      const [a, b] = SPANS[q];
+      const on = seg(t, a - 0.6, a + 0.4);
+      if (on <= 0) { place($("q" + q), 0, 0, 0); continue; }
+      const active = t < b || q === 3 ? 1 : 0;
+      const finale = seg(t, SPANS[3][1], SPANS[3][1] + 0.8);
+      const bright = lerp(0.32, 1, Math.max(Math.min(on, 1 - seg(t, b, b + 0.8)), finale));
+      const [ox, oy] = ORIG[q];
+      ctx.save();
+      ctx.globalAlpha = on * bright;
+      ctx.beginPath(); ctx.roundRect(ox, oy, QW, QH, 22); ctx.fillStyle = "rgba(255,255,255,.025)"; ctx.fill();
+      ctx.strokeStyle = `rgba(255,255,255,${0.08 + 0.14 * bright})`; ctx.lineWidth = 2; ctx.stroke();
+      ctx.clip();
+      ctx.translate(ox + 70, oy + 92);
+      ctx.scale(0.84, 0.84);
+      DRAW[q](t - a + 0.6);
+      ctx.restore();
+      const el = $("q" + q);
+      el.style.left = ox + 34 + "px"; el.style.top = oy + 24 + "px"; el.style.opacity = (on * bright).toFixed(3);
+    }
+    frameFade(t, D);
+  },
+};
+</script>
+</body>
+</html>

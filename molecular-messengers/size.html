@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="chapter"><b>04</b>Why size matters</div>
+<div class="label cyan" id="lp">Peptide<small>small and flexible</small></div>
+<div class="label violet" id="lr">Protein<small>large and folded</small></div>
+<div class="label cyan" id="key">A precision-cut key<small>shaped to fit one kind of receptor</small></div>
+<div class="label" id="rec">Receptors on the cell surface</div>
+<div id="fade"></div>
+<script type="module">
+import { W, H, C, canvas, duration, background, sphere, bond, rng, seg, ease, easeOut, lerp, rgba, shade, place, inOut, frameFade, fontsReady, camera, proteinPath, ribbon, clamp, warp } from "./shared/lib.js";
+
+const D = duration(25);
+const k = 1;
+const T = warp([[0, 0], [5, 5.8], [14.5, 15.6], [16.5, 17.6], [18, 19.4], [20.5, 21], [24, 25]]);
+const ctx = canvas();
+const $ = (id) => document.getElementById(id);
+const PRO = proteinPath();
+
+// the corridor the peptide threads, left half
+const corridor = (x) => 640 + 170 * Math.sin(x / 150 + 0.6);
+const R = rng(31);
+const left = [], right = [];
+for (let gx = 0; gx < 12; gx++) for (let gy = 0; gy < 9; gy++) {
+  const x = 40 + gx * 82 + (gy % 2) * 41 + (R() - 0.5) * 20, y = 290 + gy * 88 + (R() - 0.5) * 20, r = 34 + R() * 10;
+  if (x < 930) { if (Math.abs(y - corridor(x)) > r + 46) left.push({ x, y, r, ph: R() * 6 }); }
+  const xr = 1000 + gx * 82 + (gy % 2) * 41 + (R() - 0.5) * 12;
+  if (xr > 1330 && xr < W + 40) right.push({ x: xr, y, r: r + 4, ph: R() * 6 });
+}
+function cell(c, t, col) {
+  const r = c.r * (1 + 0.04 * Math.sin(t * 1.4 + c.ph));
+  const g = ctx.createRadialGradient(c.x - r * 0.3, c.y - r * 0.3, r * 0.1, c.x, c.y, r);
+  g.addColorStop(0, rgba(col, 0.22)); g.addColorStop(1, rgba(col, 0.06));
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(c.x, c.y, r, 0, 7); ctx.fill();
+  ctx.strokeStyle = rgba(col, 0.4); ctx.lineWidth = 2; ctx.stroke();
+}
+
+function splitScene(t, alpha) {
+  if (alpha <= 0) return;
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  for (const c of left) cell(c, t, C.cyan);
+  for (const c of right) cell(c, t, C.cyan);
+  // the peptide threads the corridor
+  const head = -60 + (t - T(1)) * 78 / k;
+  const pts = [];
+  for (let i = 0; i < 15; i++) {
+    const x = head - i * 24;
+    if (x < -40 || x > 960) continue;
+    pts.push({ x, y: corridor(x) + Math.sin(t * 4 + i) * 4, r: 11, col: i === 0 || i === 14 ? C.amber : C.cyan });
+  }
+  for (let i = 1; i < pts.length; i++) bond(ctx, pts[i - 1].x, pts[i - 1].y, pts[i].x, pts[i].y, 4, C.cyan, 0.9);
+  for (const p of pts) sphere(ctx, p.x, p.y, p.r, p.col, 1, 0.9);
+  // the protein presses against the packed cells and gets nowhere
+  const push = Math.max(0, Math.sin(t * 1.6)) * 18;
+  const cam = camera({ yaw: t * 0.35, pitch: 0.4, cx: 1150 + push, cy: 560, dist: 900, f: 1000, scale: 0.78 });
+  ribbon(ctx, PRO, cam, { width: 14 });
+  // divider
+  ctx.strokeStyle = "rgba(255,255,255,.18)"; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(960, 150); ctx.lineTo(960, 1000); ctx.stroke();
+  ctx.restore();
+}
+
+// receptors with differently shaped pockets; the peptide fits only one
+const SHAPES = ["round", "vee", "square"];
+function receptor(x, y, shape, glow, alpha) {
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  const w = 220, h = 200;
+  ctx.beginPath();
+  ctx.moveTo(x - w / 2, y + h);
+  ctx.lineTo(x - w / 2, y);
+  if (shape === "round") { ctx.lineTo(x - 50, y); ctx.arc(x, y, 50, Math.PI, 0, true); ctx.lineTo(x + w / 2, y); }
+  else if (shape === "vee") { ctx.lineTo(x - 62, y); ctx.lineTo(x, y + 80); ctx.lineTo(x + 62, y); ctx.lineTo(x + w / 2, y); }
+  else { ctx.lineTo(x - 48, y); ctx.lineTo(x - 48, y + 70); ctx.lineTo(x + 48, y + 70); ctx.lineTo(x + 48, y); ctx.lineTo(x + w / 2, y); }
+  ctx.lineTo(x + w / 2, y + h);
+  ctx.closePath();
+  const g = ctx.createLinearGradient(0, y, 0, y + h);
+  g.addColorStop(0, shade(C.violet, glow * 0.5 - 0.1)); g.addColorStop(1, shade(C.violet, -0.7));
+  ctx.fillStyle = g;
+  if (glow > 0) { ctx.shadowColor = rgba(C.cyan, glow); ctx.shadowBlur = 60 * glow; }
+  ctx.fill();
+  ctx.restore();
+}
+function lockScene(t, alpha) {
+  if (alpha <= 0) return;
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  // membrane
+  const g = ctx.createLinearGradient(0, 760, 0, 1080);
+  g.addColorStop(0, rgba(C.amber, 0.25)); g.addColorStop(0.1, rgba(C.amber, 0.08)); g.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = g; ctx.fillRect(0, 760, W, 320);
+  for (let x = 20; x < W; x += 34) sphere(ctx, x, 770 + Math.sin(x / 90 + t) * 4, 12, C.amber, 0.7, 0.2);
+  const xs = [520, 960, 1400];
+  const dock = ease(seg(t, T(18), T(20.5)));
+  const fit = Math.max(0, 1 - Math.abs(t - T(20.7)) / T(1.8));
+  xs.forEach((x, i) => receptor(x, 600, SHAPES[i], i === 1 ? fit + (dock >= 1 ? 0.35 : 0) : 0, 1));
+  // the key: a peptide hairpin in a V
+  const kx = 960, ky = lerp(250, 600, dock) + Math.sin(t * 1.5) * 10 * (1 - dock);
+  const pts = [];
+  for (let i = 0; i < 7; i++) { const s = (i - 3) / 3; pts.push({ x: kx + s * 58, y: ky + (1 - Math.abs(s)) * 72 - 12, r: 15, col: i === 3 ? C.amber : C.cyan }); }
+  for (let i = 1; i < pts.length; i++) bond(ctx, pts[i - 1].x, pts[i - 1].y, pts[i].x, pts[i].y, 5, C.cyan, 0.9);
+  for (const p of pts) sphere(ctx, p.x, p.y, p.r, p.col, 1, 0.9 + fit);
+  ctx.restore();
+  place($("key"), kx, ky - 110, inOut(t, T(16.5), D) * alpha);
+  place($("rec"), 960, 930, inOut(t, T(17), D) * alpha);
+}
+
+window.film = {
+  duration: D,
+  ready: fontsReady(),
+  frame(t) {
+    background(ctx, t, 13, C.cyan);
+    const sw = seg(t, T(14.5), T(16));
+    splitScene(t, 1 - sw);
+    lockScene(t, sw);
+    place($("lp"), 480, 190, inOut(t, T(1), T(15.5)));
+    place($("lr"), 1440, 190, inOut(t, T(5), T(15.5)));
+    if (sw <= 0) { place($("key"), 0, 0, 0); place($("rec"), 0, 0, 0); }
+    frameFade(t, D);
+  },
+};
+</script>
+</body>
+</html>

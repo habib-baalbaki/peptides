@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peptide Video Script — Interactive Studio & Teleprompter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-dark: #0a0e17;
+    --card-bg: #111827;
+    --card-border: #1f293d;
+    --accent-cyan: #06b6d4;
+    --accent-blue: #3b82f6;
+    --accent-purple: #8b5cf6;
+    --accent-emerald: #10b981;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    background: #0f172a;
+    border-bottom: 1px solid var(--card-border);
+    padding: 14px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .badge {
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+    color: #fff;
+    font-weight: 800;
+    font-size: 13px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .title-group h1 {
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .title-group p {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .controls-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    background: #1e293b;
+    color: #fff;
+    border: 1px solid var(--card-border);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+
+  .btn:hover {
+    background: #334155;
+    border-color: var(--accent-cyan);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+    border: none;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);
+  }
+
+  .btn-primary:hover {
+    filter: brightness(1.1);
+  }
+
+  .tabs {
+    display: flex;
+    background: #0a0e17;
+    border-bottom: 1px solid var(--card-border);
+    padding: 0 24px;
+  }
+
+  .tab {
+    padding: 12px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .tab:hover {
+    color: var(--text-primary);
+  }
+
+  .tab.active {
+    color: var(--accent-cyan);
+    border-bottom-color: var(--accent-cyan);
+  }
+
+  main {
+    flex: 1;
+    padding: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* Teleprompter View */
+  .teleprompter-container {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 24px;
+  }
+
+  @media (max-width: 960px) {
+    .teleprompter-container { grid-template-columns: 1fr; }
+  }
+
+  .script-scroll-window {
+    background: #060911;
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 40px;
+    max-height: 75vh;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    position: relative;
+  }
+
+  .scene-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    transition: all 0.3s ease;
+  }
+
+  .scene-card.active-scene {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 25px rgba(6, 182, 212, 0.2);
+    transform: scale(1.01);
+  }
+
+  .scene-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .scene-time {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent-cyan);
+    background: rgba(6, 182, 212, 0.12);
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  .scene-name {
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: -0.01em;
+  }
+
+  .host-dialogue {
+    font-size: 18px;
+    line-height: 1.7;
+    color: #f1f5f9;
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
+
+  .vfx-summary {
+    background: #090d16;
+    border-left: 3px solid var(--accent-purple);
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #cbd5e1;
+    border-radius: 0 8px 8px 0;
+  }
+
+  .vfx-summary strong {
+    color: var(--accent-purple);
+    font-size: 11px;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* Right Side Panel */
+  .side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .control-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 18px;
+  }
+
+  .control-card h3 {
+    font-size: 13px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    letter-spacing: 0.05em;
+    margin-bottom: 14px;
+  }
+
+  .slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .slider-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #cbd5e1;
+  }
+
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent-cyan);
+  }
+
+  /* Table View */
+  .table-view {
+    display: none;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    text-align: left;
+  }
+
+  th, td {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--card-border);
+    vertical-align: top;
+  }
+
+  th {
+    background: #0f172a;
+    color: var(--text-secondary);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  td:first-child {
+    font-family: var(--font-mono);
+    color: var(--accent-cyan);
+    width: 120px;
+    font-size: 13px;
+  }
+
+  td:nth-child(2) {
+    width: 45%;
+    border-right: 1px solid var(--card-border);
+    line-height: 1.6;
+    color: #cbd5e1;
+  }
+
+  td:nth-child(3) {
+    line-height: 1.6;
+  }
+
+  /* VFX Copy Box */
+  .vfx-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+
+  .vfx-prompt-text {
+    background: #080c14;
+    padding: 12px;
+    border-radius: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: #38bdf8;
+    margin: 10px 0;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="badge">NXT Studio</span>
+    <div class="title-group">
+      <h1>The Science of Peptides — Video Production Hub</h1>
+      <p>Interactive Teleprompter · Audio Synthesizer · 3D Visual Cues</p>
+    </div>
+  </div>
+  <div class="controls-bar">
+    <button class="btn btn-primary" id="playBtn" onclick="togglePlayback()">▶ Read Aloud / Play</button>
+    <button class="btn" onclick="resetScroll()">⏮ Reset</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('prompter')">🎙 Live Teleprompter & Audio</div>
+  <div class="tab" onclick="switchTab('avtable')">📋 Full A/V Screenplay Table</div>
+  <div class="tab" onclick="switchTab('vfx')">✨ 3D / AI Video Prompts</div>
+</div>
+
+<main>
+  <!-- TAB 1: TELEPROMPTER -->
+  <div id="prompterTab" class="teleprompter-container">
+    <div class="script-scroll-window" id="scrollWindow">
+      
+      <div class="scene-card" id="scene-1">
+        <div class="scene-header">
+          <span class="scene-name">Scene 1: The Hook & Cellular Messages</span>
+          <span class="scene-time">0:00 - 0:25</span>
+        </div>
+        <div class="host-dialogue">
+          "Right now, inside every one of your 37 trillion cells, millions of urgent messages are being delivered every single second.<br><br>
+          They dictate when to heal an injury, when to burn fat, when to release hormones, and when to rebuild skin.<br><br>
+          The messengers delivering these critical commands aren’t massive machines. They’re tiny molecular sequences called <strong>peptides</strong>."
+        </div>
+        <div class="vfx-summary">
+          <strong>Visual Cue</strong>
+          Wide camera zoom from human body → bloodstream → glowing peptide chain navigating red blood cells.
+        </div>
+      </div>
+
+      <div class="scene-card" id="scene-2">
+        <div class="scene-header">
+          <span class="scene-name">Scene 2: What is a Peptide? (The Language Analogy)</span>
+          <span class="scene-time">0:25 - 0:55</span>
+        </div>
+        <div class="host-dialogue">
+          "Chances are, you’ve heard about peptides recently—whether in metabolic medicine, skincare, or tissue repair. But what actually is a peptide on a chemical level?<br><br>
+          Think of your body's molecular machinery like language.<br><br>
+          If individual <strong>amino acids</strong> are single letters, a <strong>peptide</strong> is a short, precise word or sentence.<br><br>
+          A <strong>protein</strong>, on the other hand, is an entire encyclopedia."
+        </div>
+        <div class="vfx-summary">
+          <strong>Visual Cue</strong>
+          Lego-like amino acid blocks snap together into a 15-unit chain, contrasted with a massive folded 500-unit protein structure.
+        </div>
+      </div>
+
+      <div class="scene-card" id="scene-3">
+        <div class="scene-header">
+          <span class="scene-name">Scene 3: The Chemistry — Amino Acids & Condensation</span>
+          <span class="scene-time">0:55 - 1:40</span>
+        </div>
+        <div class="host-dialogue">
+          "To understand how they work, let’s look at the chemistry.<br><br>
+          Every peptide starts with amino acids. Each amino acid possesses three core components: an amino group at one end, a carboxylic acid group at the other, and a unique variable side chain—the 'R group'—which gives each amino acid its distinct personality.<br><br>
+          When two amino acids come together, a chemical reaction called <strong>dehydration synthesis</strong> occurs.<br><br>
+          The acid group sheds an oxygen and hydrogen, while the amine group drops a hydrogen. Together, they leave as a molecule of water.<br><br>
+          What remains is a rock-solid covalent bond: <strong>the peptide bond</strong>. Chain a handful of these together, and you have an active biological signal."
+        </div>
+        <div class="vfx-summary">
+          <strong>Visual Cue</strong>
+          3D ball-and-stick model. Amine (-NH2) and Carboxyl (-COOH) merge; H2O vaporizes off; metallic snap of the planar amide bond (-CO-NH-).
+        </div>
+      </div>
+
+      <div class="scene-card" id="scene-4">
+        <div class="scene-header">
+          <span class="scene-name">Scene 4: Why Size Matters — The Precision Key</span>
+          <span class="scene-time">1:40 - 2:30</span>
+        </div>
+        <div class="host-dialogue">
+          "Why does the distinction between peptides and proteins matter so much to science?<br><br>
+          Because size dictates function.<br><br>
+          Proteins—like hemoglobin or collagen—are massive macromolecules that fold into intricate 3D shapes. They carry oxygen, build tissue scaffolds, and catalyze chemical reactions.<br><br>
+          Peptides, typically containing between 2 and 50 amino acids, are much smaller and more flexible.<br><br>
+          They don’t need giant folds to do their job. Instead, they act like precision-cut keys designed to slide directly into specific cellular locks."
+        </div>
+        <div class="vfx-summary">
+          <strong>Visual Cue</strong>
+          Side-by-side agility test: Small peptide navigates crowded extracellular matrix; bulky protein is slow and structural.
+        </div>
+      </div>
+
+      <div class="scene-card" id="scene-5">
+        <div class="scene-header">
+          <span class="scene-name">Scene 5: Mechanism of Action — Receptors & Cascades</span>
+          <span class="scene-time">2:30 - 3:35</span>
+        </div>
+        <div class="host-dialogue">
+          "So, what happens when a peptide reaches its destination?<br><br>
+          On the surface of your cells sit receptors—most famously, G-Protein Coupled Receptors, or GPCRs.<br><br>
+          When a specific peptide matches the receptor’s binding pocket, it triggers an instant conformational change.<br><br>
+          The peptide doesn't even need to enter the cell! Just by docking on the outside, it initiates an intracellular signaling cascade. Second messengers like cyclic AMP ignite a chain reaction, instructing the cell to ramp up repair, open ion channels, or modulate cellular metabolism.<br><br>
+          And because peptides are natural signaling molecules, they are remarkably selective—delivering high-potency instructions with pinpoint accuracy."
+        </div>
+        <div class="vfx-summary">
+          <strong>Visual Cue</strong>
+          7-transmembrane GPCR docking; mechanical shape shift; intracellular G-protein dissociates with golden light waves.
+        </div>
+      </div>
+
+      <div class="scene-card" id="scene-6">
+        <div class="scene-header">
+          <span class="scene-name">Scene 6: Real-World Usages — GLP-1, BPC-157, & Rejuvenation</span>
+          <span class="scene-time">4:20 - 6:30</span>
+        </div>
+        <div class="host-dialogue">
+          "Let’s look at where this science translates into real-world medicine.<br><br>
+          The most prominent example in modern history? Metabolic peptides like insulin and GLP-1 receptor agonists, which regulate glucose and trigger central satiety signals.<br><br>
+          In regenerative research, compounds like <strong>BPC-157</strong> and <strong>Thymosin Beta-4</strong> stimulate angiogenesis and cell migration to heal damaged tendons and gut lining.<br><br>
+          Meanwhile, growth hormone secretagogues like <strong>CJC-1295</strong> and <strong>Ipamorelin</strong> trigger natural, pulsatile endocrine signals, and copper peptides like <strong>GHK-Cu</strong> activate fibroblasts to produce fresh collagen and elastin."
+        </div>
+        <div class="vfx-summary">
+          <strong>Visual Cue</strong>
+          Four-quadrant display: Pancreas (GLP-1), Healing tendon (BPC-157), Pituitary gland (CJC/Ipa), Dermis collagen (GHK-Cu).
+        </div>
+      </div>
+
+      <div class="scene-card" id="scene-7">
+        <div class="scene-header">
+          <span class="scene-name">Scene 7: Synthesis, Purity & Outro</span>
+          <span class="scene-time">6:30 - 7:45</span>
+        </div>
+        <div class="host-dialogue">
+          "How do scientists produce these molecules? Through Solid-Phase Peptide Synthesis, building chains residue-by-residue on resin beads, verified with HPLC and Mass Spectrometry for 99%+ purity.<br><br>
+          Peptides aren’t just a wellness trend—they are the fundamental language through which living organisms orchestrate life, repair, and adaptation.<br><br>
+          Hit like, subscribe, and tell us in the comments which peptide pathway you’d like us to explore next!"
+        </div>
+        <div class="vfx-summary">
+          <strong>Visual Cue</strong>
+          Resin bead synthesis animation + HPLC 99% single-peak chromatogram + closing glowing DNA/peptide helix.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Side Controls -->
+    <div class="side-panel">
+      <div class="control-card">
+        <h3>Teleprompter & Audio Controls</h3>
+        <div class="slider-group">
+          <div class="slider-label"><span>Font Size</span><span id="fontSizeVal">18px</span></div>
+          <input type="range" min="14" max="32" value="18" oninput="changeFontSize(this.value)">
+        </div>
+        <div class="slider-group">
+          <div class="slider-label"><span>Speech Voice</span></div>
+          <select id="voiceSelect" style="width: 100%; background: #0b1120; color: #fff; border: 1px solid #1e293b; padding: 6px; border-radius: 6px; font-size: 12px;"></select>
+        </div>
+        <div class="slider-group">
+          <div class="slider-label"><span>Speech / Read Speed</span><span id="rateVal">1.0x</span></div>
+          <input type="range" min="0.7" max="1.5" step="0.1" value="1.0" id="rateSlider" oninput="document.getElementById('rateVal').innerText = this.value + 'x'">
+        </div>
+      </div>
+
+      <div class="control-card">
+        <h3>Production Quick Actions</h3>
+        <button class="btn" style="width: 100%; margin-bottom: 8px;" onclick="copyFullScript()">📋 Copy Clean Text for Teleprompter</button>
+        <button class="btn" style="width: 100%;" onclick="copyVoiceoverOnly()">🎙 Copy Host Dialogue Only (for TTS)</button>
+      </div>
+
+      <div class="control-card">
+        <h3>Presenter Tips</h3>
+        <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">
+          • Keep eye line aligned with top third of camera lens.<br>
+          • Pause for 1.5 seconds on visual transitions (e.g. "To understand how they work... [pause for bond animation]").<br>
+          • Pronunciation: <em>Ipamorelin</em> (ip-ah-mor-EL-in), <em>Angiogenesis</em> (an-jee-oh-JEN-uh-sis).
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: FULL TABLE -->
+  <div id="avtableTab" class="table-view">
+    <table>
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Visual & 3D Animation Cue</th>
+          <th>Audio / Narration Dialogue</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0:00 - 0:25</td>
+          <td><strong>Wide Studio:</strong> Pushes into bloodstream. Tiny peptide chain navigation.</td>
+          <td>"Right now, inside every one of your 37 trillion cells, millions of urgent messages are being delivered every second... The messengers are peptides."</td>
+        </tr>
+        <tr>
+          <td>0:25 - 0:55</td>
+          <td><strong>Language Analogy:</strong> Blocks link into 15-unit chain vs. 500-unit protein folding.</td>
+          <td>"If individual amino acids are letters, a peptide is a short word or sentence. A protein is an entire encyclopedia."</td>
+        </tr>
+        <tr>
+          <td>0:55 - 1:40</td>
+          <td><strong>Dehydration Reaction:</strong> Amine + Carboxylic Acid combine. H2O leaves; planar amide bond forms.</td>
+          <td>"When two amino acids meet, dehydration synthesis occurs... What remains is a rock-solid covalent bond: the peptide bond."</td>
+        </tr>
+        <tr>
+          <td>1:40 - 2:30</td>
+          <td><strong>Peptide vs Protein:</strong> Small, agile key vs bulky enzyme/structural framework.</td>
+          <td>"Peptides typically contain 2 to 50 amino acids... acting like precision-cut keys designed to slide directly into cellular locks."</td>
+        </tr>
+        <tr>
+          <td>2:30 - 3:35</td>
+          <td><strong>Cellular Lock & Key:</strong> GPCR receptor binding pocket; intracellular cAMP cascade.</td>
+          <td>"Just by docking on the outside, it initiates an intracellular signaling cascade... delivering high-potency instructions with pinpoint accuracy."</td>
+        </tr>
+        <tr>
+          <td>4:20 - 6:30</td>
+          <td><strong>Major Classes:</strong> GLP-1 (metabolic), BPC-157 & TB-500 (tissue/angiogenesis), CJC/Ipamorelin (GH), GHK-Cu (collagen).</td>
+          <td>"From blood sugar regulation with GLP-1, to soft-tissue repair with BPC-157, to pulsatile growth hormone secretion and skin remodeling..."</td>
+        </tr>
+        <tr>
+          <td>6:30 - 7:45</td>
+          <td><strong>SPPS & Purity:</strong> Solid-Phase resin bead synthesis + HPLC 99% peak. Outro.</td>
+          <td>"Solid-Phase Peptide Synthesis... verified with HPLC and Mass Spectrometry. Peptides are the fundamental language of physiology."</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TAB 3: VFX PROMPTS -->
+  <div id="vfxTab" style="display: none;">
+    <div class="vfx-card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-size: 15px; color: #fff;">1. Dehydration Synthesis & Peptide Bond (-CO-NH-)</h3>
+        <button class="btn" onclick="copyText('prompt1')">Copy Prompt</button>
+      </div>
+      <div class="vfx-prompt-text" id="prompt1">
+Photorealistic 3D scientific rendering of two amino acids approaching each other on dark slate background with cinematic volumetric blue and gold lighting. Amine group (-NH2) glowing in cyan, carboxylic acid group (-COOH) glowing in ruby red. A water molecule (H2O) detaches and floats away as a brilliant covalent peptide bond snaps together between carbon and nitrogen. 8k, scientific accuracy, hyper-detailed molecular dynamics.
+      </div>
+    </div>
+
+    <div class="vfx-card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-size: 15px; color: #fff;">2. 7-Transmembrane GPCR Receptor Binding</h3>
+        <button class="btn" onclick="copyText('prompt2')">Copy Prompt</button>
+      </div>
+      <div class="vfx-prompt-text" id="prompt2">
+Macro biomedical animation of a cell membrane with a 7-transmembrane GPCR receptor embedded in the lipid bilayer. A luminous flexible peptide chain binds into the extracellular pocket, causing a mechanical conformational shift. Intracellular G-proteins illuminate and release bright secondary messenger particles into the cytoplasm. Depth of field, cinematic lighting, medical-grade scientific animation.
+      </div>
+    </div>
+
+    <div class="vfx-card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-size: 15px; color: #fff;">3. BPC-157 Angiogenesis & Soft-Tissue Repair</h3>
+        <button class="btn" onclick="copyText('prompt3')">Copy Prompt</button>
+      </div>
+      <div class="vfx-prompt-text" id="prompt3">
+Microscopic 3D animation of damaged collagen fibers in human connective tissue. Micro-capillary blood vessels sprouting and branching in golden bioluminescent filaments, with fibroblasts depositing fresh strands of collagen matrix. Ultra-realistic, 4k scientific visualization.
+      </div>
+    </div>
+
+    <div class="vfx-card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-size: 15px; color: #fff;">4. GHK-Cu Copper Tripeptide Complex</h3>
+        <button class="btn" onclick="copyText('prompt4')">Copy Prompt</button>
+      </div>
+      <div class="vfx-prompt-text" id="prompt4">
+Sleek molecular visualization of the tripeptide Glycyl-L-Histidyl-L-Lysine forming a stable chelate around a glowing sapphire-blue Copper (Cu2+) cation. Translucent atomic bonds, subtle caustic reflections, dark laboratory aesthetic, octane render.
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  let isPlaying = false;
+  let currentSceneIndex = 0;
+  const scenes = document.querySelectorAll('.scene-card');
+  let synth = window.speechSynthesis;
+  let utter = null;
+
+  // Load voices
+  function populateVoices() {
+    const voiceSelect = document.getElementById('voiceSelect');
+    if (!voiceSelect || !synth) return;
+    voiceSelect.innerHTML = '';
+    const voices = synth.getVoices();
+    voices.forEach((v, i) => {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = `${v.name} (${v.lang})`;
+      if (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Jenny') || v.name.includes('Aria') || v.name.includes('Zira') || (v.lang.startsWith('en') && v.name.toLowerCase().includes('female'))) {
+        opt.selected = true;
+      }
+      voiceSelect.appendChild(opt);
+    });
+  }
+
+  if (speechSynthesis.onvoiceschanged !== undefined) {
+    speechSynthesis.onvoiceschanged = populateVoices;
+  }
+  populateVoices();
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('prompterTab').style.display = 'none';
+    document.getElementById('avtableTab').style.display = 'none';
+    document.getElementById('vfxTab').style.display = 'none';
+
+    if (tab === 'prompter') {
+      document.querySelectorAll('.tab')[0].classList.add('active');
+      document.getElementById('prompterTab').style.display = 'grid';
+    } else if (tab === 'avtable') {
+      document.querySelectorAll('.tab')[1].classList.add('active');
+      document.getElementById('avtableTab').style.display = 'block';
+    } else if (tab === 'vfx') {
+      document.querySelectorAll('.tab')[2].classList.add('active');
+      document.getElementById('vfxTab').style.display = 'block';
+    }
+  }
+
+  function changeFontSize(size) {
+    document.getElementById('fontSizeVal').innerText = size + 'px';
+    document.querySelectorAll('.host-dialogue').forEach(el => el.style.fontSize = size + 'px');
+  }
+
+  function playScene(index) {
+    if (index >= scenes.length) {
+      isPlaying = false;
+      document.getElementById('playBtn').innerHTML = '▶ Read Aloud / Play';
+      return;
+    }
+    currentSceneIndex = index;
+    scenes.forEach((s, idx) => {
+      s.classList.toggle('active-scene', idx === index);
+    });
+
+    const activeScene = scenes[index];
+    activeScene.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // Clean text for speech
+    const dialogue = activeScene.querySelector('.host-dialogue').innerText;
+    utter = new SpeechSynthesisUtterance(dialogue);
+    
+    const voices = synth.getVoices();
+    const selectedVoiceIndex = document.getElementById('voiceSelect').value;
+    if (voices[selectedVoiceIndex]) {
+      utter.voice = voices[selectedVoiceIndex];
+    }
+    utter.rate = parseFloat(document.getElementById('rateSlider').value) || 1.0;
+
+    utter.onend = () => {
+      if (isPlaying) {
+        setTimeout(() => playScene(index + 1), 600);
+      }
+    };
+
+    utter.onerror = () => {
+      isPlaying = false;
+      document.getElementById('playBtn').innerHTML = '▶ Read Aloud / Play';
+    };
+
+    synth.speak(utter);
+  }
+
+  function togglePlayback() {
+    if (!synth) {
+      alert("Web Speech API not supported in this browser.");
+      return;
+    }
+    if (isPlaying) {
+      synth.cancel();
+      isPlaying = false;
+      document.getElementById('playBtn').innerHTML = '▶ Read Aloud / Play';
+    } else {
+      isPlaying = true;
+      document.getElementById('playBtn').innerHTML = '⏸ Pause Reading';
+      playScene(currentSceneIndex);
+    }
+  }
+
+  function resetScroll() {
+    synth.cancel();
+    isPlaying = false;
+    currentSceneIndex = 0;
+    document.getElementById('playBtn').innerHTML = '▶ Read Aloud / Play';
+    scenes.forEach(s => s.classList.remove('active-scene'));
+    document.getElementById('scrollWindow').scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function copyText(id) {
+    const text = document.getElementById(id).innerText;
+    navigator.clipboard.writeText(text);
+    alert('Prompt copied to clipboard!');
+  }
+
+  function copyVoiceoverOnly() {
+    const dialogues = Array.from(document.querySelectorAll('.host-dialogue'))
+      .map(el => el.innerText.trim())
+      .join('\n\n');
+    navigator.clipboard.writeText(dialogues);
+    alert('Host voiceover script copied to clipboard!');
+  }
+
+  function copyFullScript() {
+    const full = Array.from(scenes).map(s => {
+      const title = s.querySelector('.scene-name').innerText;
+      const time = s.querySelector('.scene-time').innerText;
+      const speech = s.querySelector('.host-dialogue').innerText;
+      return `=== ${title} (${time}) ===\n${speech}\n`;
+    }).join('\n');
+    navigator.clipboard.writeText(full);
+    alert('Full script copied to clipboard!');
+  }
+</script>
+
+</body>
+</html>

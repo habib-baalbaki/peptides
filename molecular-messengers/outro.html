@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="shared/style.css">
+<style>
+  #card { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; }
+  .logo { display: flex; align-items: baseline; gap: 22px; font-size: 150px; font-weight: 700; letter-spacing: .04em; color: #fff; }
+  .logo small { font-size: 40px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: var(--dim); }
+  .url { margin-top: 26px; font-size: 44px; font-weight: 500; color: var(--amber); letter-spacing: .02em; }
+  .tested { margin-top: 18px; font-size: 26px; font-weight: 300; color: var(--ink); letter-spacing: .04em; }
+  .ruo { position: absolute; bottom: 70px; left: 0; right: 0; text-align: center; font-size: 21px; font-weight: 300; color: var(--dim); letter-spacing: .02em; }
+  .ruo b { font-weight: 600; color: var(--ink); }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="label big" id="line" style="font-weight: 500; font-size: 52px">The chemical language of life</div>
+<div id="card">
+  <div class="logo">NX/T <small>Canada</small></div>
+  <div class="url">nxtcanada.ca</div>
+  <div class="tested">Independently tested by Janoshik Analytical</div>
+  <div class="ruo"><b>For laboratory research use only.</b> Not for human or veterinary use. This video is educational and is not medical advice.</div>
+</div>
+<div id="fade"></div>
+<script type="module">
+import { W, H, C, canvas, duration, background, sphere, bond, rng, seg, ease, easeOut, easeIn, lerp, rgba, place, inOut, frameFade, fontsReady, camera, clamp, warp } from "./shared/lib.js";
+
+const D = duration(23);
+const T = warp([[0, 0], [1.5, 1.5], [8, 10], [11.5, 13.5], [22, 23]]);
+const ctx = canvas();
+const $ = (id) => document.getElementById(id);
+
+// an α-helix: 3.6 residues per turn
+const N = 30;
+const HX = Array.from({ length: N }, (_, i) => { const a = (i / 3.6) * Math.PI * 2; return [Math.cos(a) * 120, (i - N / 2) * 26, Math.sin(a) * 120, i]; });
+const R = rng(91);
+const DUST = HX.map(() => Array.from({ length: 14 }, () => ({ a: R() * 6.28, sp: 40 + R() * 160, up: 60 + R() * 140, s: 1.5 + R() * 3 })));
+
+window.film = {
+  duration: D,
+  ready: fontsReady(),
+  frame(t) {
+    background(ctx, t, 43, C.amber, [0.5, 0.5]);
+    const dis = seg(t, T(8), T(11.5));
+    const cam = camera({ yaw: t * 0.5, pitch: 0.25, cx: W / 2, cy: H / 2 - 20, dist: 1400, f: 1400, scale: lerp(0.95, 1.1, t / D) });
+    const P = HX.map((p) => ({ ...cam([p[0], p[1], p[2]]), i: p[3] }));
+    // each residue dissolves in turn, top to bottom
+    const life = (i) => clamp(dis * 2.2 - (i / N) * 1.2);
+    for (let i = 1; i < N; i++) bond(ctx, P[i - 1].x, P[i - 1].y, P[i].x, P[i].y, 6 * P[i].k, C.white, 0.7 * (1 - Math.max(life(i), life(i - 1))));
+    const order = [...P].sort((a, b) => b.z - a.z);
+    for (const p of order) {
+      const l = life(p.i);
+      sphere(ctx, p.x, p.y, 20 * p.k, p.i % 3 ? C.cyan : C.amber, 1 - l, 0.8 + l);
+      if (l > 0 && l < 1) {
+        for (const d of DUST[p.i]) {
+          ctx.fillStyle = rgba(C.amber, 0.7 * (1 - l));
+          ctx.beginPath(); ctx.arc(p.x + Math.cos(d.a) * d.sp * l, p.y + Math.sin(d.a) * d.sp * l * 0.5 - d.up * l, d.s, 0, 7); ctx.fill();
+        }
+      }
+    }
+    // a soft golden bloom where the helix was
+    const bloom = Math.sin(Math.PI * seg(t, T(9), T(13)));
+    if (bloom > 0) {
+      const g = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, 700);
+      g.addColorStop(0, rgba(C.amber, 0.28 * bloom)); g.addColorStop(1, rgba(C.amber, 0));
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    }
+    place($("line"), W / 2, 930, inOut(t, T(1.5), T(9)));
+    $("card").style.opacity = seg(t, T(11.5), T(13)).toFixed(3);
+    frameFade(t, D, 0.5, 1.2);
+  },
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="shared/style.css">
+<style>
+  .axis { font-size: 18px; font-weight: 300; color: var(--dim); }
+  .ptitle { font-size: 26px; font-weight: 600; text-align: left; transform: none !important; }
+  .ptitle small { text-align: left; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="chapter"><b>08</b>How peptides are made</div>
+<div class="label amber" id="spps">Solid-phase peptide synthesis<small>one amino acid at a time, on resin beads</small></div>
+<div class="label cyan" id="plus">+1 amino acid</div>
+<div class="label ptitle cyan" id="hplc">HPLC<small>purity, as % of total peak area</small></div>
+<div class="label ptitle amber" id="ms">Mass spectrometry<small>identity, by molecular mass</small></div>
+<div class="label axis" id="ax1">retention time →</div>
+<div class="label axis" id="ax2">mass / charge →</div>
+<div class="label" id="peak">Main peak</div>
+<div class="label amber" id="mh">[M+H]⁺<small>matches the expected mass</small></div>
+<div class="label axis" id="illus">Illustrative data</div>
+<div id="fade"></div>
+<script type="module">
+import { W, H, C, canvas, duration, background, sphere, bond, rng, seg, ease, easeOut, lerp, rgba, shade, place, inOut, frameFade, fontsReady, clamp } from "./shared/lib.js";
+
+const D = duration(30);
+const k = 1; // beats below are set to the narration
+const T = (s) => s * k;
+const ctx = canvas();
+const $ = (id) => document.getElementById(id);
+
+const R = rng(81);
+const COL = { x: 170, y: 220, w: 260, h: 640 };
+const RESIN = [];
+for (let i = 0; i < 70; i++) RESIN.push({ x: COL.x + 30 + R() * (COL.w - 60), y: COL.y + 120 + R() * (COL.h - 160), r: 14 + R() * 8 });
+const STEP = 0.72, T0 = 5, MAXN = 9;
+const RES_COL = [C.cyan, C.amber, C.coral, C.blue, C.cyan, C.green, C.amber, C.violet, C.cyan];
+
+function column(t, dim) {
+  ctx.save(); ctx.globalAlpha *= dim;
+  const g = ctx.createLinearGradient(COL.x, 0, COL.x + COL.w, 0);
+  g.addColorStop(0, "rgba(160,220,255,.16)"); g.addColorStop(0.2, "rgba(160,220,255,.04)"); g.addColorStop(0.85, "rgba(160,220,255,.03)"); g.addColorStop(1, "rgba(160,220,255,.18)");
+  ctx.fillStyle = g; ctx.strokeStyle = "rgba(180,230,255,.45)"; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.roundRect(COL.x, COL.y, COL.w, COL.h, [10, 10, 60, 60]); ctx.fill(); ctx.stroke();
+  // solvent
+  const lv = COL.y + 90 + Math.sin(t * 1.3) * 4;
+  ctx.fillStyle = "rgba(63,216,255,.07)"; ctx.fillRect(COL.x + 3, lv, COL.w - 6, COL.y + COL.h - lv - 40);
+  for (const b of RESIN) sphere(ctx, b.x, b.y, b.r, C.amber, 0.55, 0.25);
+  ctx.restore();
+}
+
+function magnified(t, dim) {
+  const cx = 760, cy = 560, R0 = 120;
+  ctx.save(); ctx.globalAlpha *= dim;
+  // a line from the column to the magnified bead
+  ctx.strokeStyle = "rgba(255,255,255,.18)"; ctx.setLineDash([6, 8]); ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(RESIN[5].x, RESIN[5].y); ctx.lineTo(cx - R0 - 30, cy); ctx.stroke(); ctx.setLineDash([]);
+  sphere(ctx, cx, cy, R0, C.amber, 0.9, 0.5);
+  // chains growing from the bead, one residue per step
+  const n = clamp(Math.floor((t - T(T0)) / T(STEP)) + 1, 0, MAXN);
+  const prog = (t - T(T0)) / T(STEP) - Math.floor((t - T(T0)) / T(STEP));
+  for (let a = 0; a < 5; a++) {
+    const ang = -Math.PI / 2 + (a - 2) * 0.5;
+    let px = cx + Math.cos(ang) * R0, py = cy + Math.sin(ang) * R0;
+    for (let i = 0; i < n; i++) {
+      const isNew = i === n - 1 && n < MAXN + 1 && t < T(T0 + MAXN * STEP);
+      const s = isNew ? easeOut(clamp(prog * 2)) : 1;
+      const zz = ang + Math.sin(i * 1.3 + a) * 0.18;
+      const qx = px + Math.cos(zz) * 34 * s, qy = py + Math.sin(zz) * 34 * s;
+      bond(ctx, px, py, qx, qy, 4, C.white, 0.8 * s);
+      sphere(ctx, qx, qy, 12, RES_COL[i], s, isNew ? 1.6 : 0.6);
+      px = qx; py = qy;
+    }
+  }
+  ctx.restore();
+  return { cx, cy, n };
+}
+
+// the illustrative chromatogram: one sharp main peak, small impurities, baseline noise
+const P = { x: 1000, y: 170, w: 840, h: 360 };
+const M = { x: 1000, y: 600, w: 840, h: 300 };
+const gauss = (x, m, s) => Math.exp(-((x - m) ** 2) / (2 * s * s));
+const noise = (x) => (Math.sin(x * 917.1) * 43758.5453) % 1;
+const hplcY = (u) => 0.95 * gauss(u, 0.58, 0.009) + 0.03 * gauss(u, 0.41, 0.01) + 0.018 * gauss(u, 0.71, 0.012) + 0.006 * noise(u);
+function panel(r, alpha) {
+  ctx.save(); ctx.globalAlpha *= alpha;
+  ctx.fillStyle = "rgba(10,20,34,.75)"; ctx.strokeStyle = "rgba(120,200,255,.25)"; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect(r.x - 40, r.y - 30, r.w + 80, r.h + 60, 18); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = "rgba(255,255,255,.3)";
+  ctx.beginPath(); ctx.moveTo(r.x, r.y + 60); ctx.lineTo(r.x, r.y + r.h); ctx.lineTo(r.x + r.w, r.y + r.h); ctx.stroke();
+  ctx.restore();
+}
+function hplc(t, alpha) {
+  panel(P, alpha);
+  const draw = ease(seg(t, T(19.5), T(22.5)));
+  if (draw <= 0) return;
+  ctx.save(); ctx.globalAlpha *= alpha;
+  ctx.strokeStyle = C.cyan; ctx.lineWidth = 3.5; ctx.shadowColor = rgba(C.cyan, 0.8); ctx.shadowBlur = 12;
+  ctx.beginPath();
+  for (let i = 0; i <= 600 * draw; i++) { const u = i / 600; ctx.lineTo(P.x + u * P.w, P.y + P.h - 4 - hplcY(u) * (P.h - 80)); }
+  ctx.stroke();
+  ctx.restore();
+}
+const MSB = [[0.18, 0.06], [0.31, 0.1], [0.47, 0.08], [0.52, 0.04], [0.63, 1], [0.66, 0.32], [0.69, 0.1], [0.82, 0.05]];
+function ms(t, alpha) {
+  panel(M, alpha);
+  ctx.save(); ctx.globalAlpha *= alpha;
+  MSB.forEach(([u, h], i) => {
+    const g = easeOut(seg(t, T(23.2) + i * 0.12, T(24.7) + i * 0.12));
+    if (g <= 0) return;
+    const x = M.x + u * M.w, hh = h * (M.h - 70) * g;
+    ctx.fillStyle = h === 1 ? C.amber : rgba(C.amber, 0.6);
+    if (h === 1) { ctx.shadowColor = rgba(C.amber, 0.9); ctx.shadowBlur = 20; }
+    ctx.fillRect(x - 4, M.y + M.h - hh, 8, hh);
+    ctx.shadowBlur = 0;
+  });
+  ctx.restore();
+}
+
+window.film = {
+  duration: D,
+  ready: fontsReady(),
+  frame(t) {
+    background(ctx, t, 37, C.amber);
+    const shift = ease(seg(t, T(11.6), T(13)));
+    const dim = lerp(1, 0.45, shift);
+    column(t, dim);
+    const m = magnified(t, dim);
+    const pa = seg(t, T(12), T(13.5));
+    hplc(t, pa);
+    ms(t, pa);
+
+    place($("spps"), 470, 160, inOut(t, T(4.5), T(12)));
+    const stepping = t > T(T0) && t < T(T0 + MAXN * STEP);
+    const ph = ((t - T(T0)) / T(STEP)) % 1;
+    place($("plus"), m.cx, m.cy + 190, stepping ? Math.min(1, ph * 4, (1 - ph) * 3) * (1 - shift) : 0);
+    place($("hplc"), P.x - 10, P.y - 10, pa);
+    place($("ms"), M.x - 10, M.y - 10, pa);
+    place($("ax1"), P.x + P.w - 90, P.y + P.h + 20, pa);
+    place($("ax2"), M.x + M.w - 90, M.y + M.h + 20, pa);
+    place($("illus"), P.x + P.w - 80, P.y + 10, pa * 0.8);
+    place($("peak"), P.x + 0.58 * P.w + 120, P.y + 110, inOut(t, T(22.3), D));
+    place($("mh"), M.x + 0.63 * M.w + 170, M.y + 110, inOut(t, T(25.5), D));
+    frameFade(t, D);
+  },
+};
+</script>
+</body>
+</html>

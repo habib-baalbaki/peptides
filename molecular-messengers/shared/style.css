@@ -1,0 +1,55 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+
+:root {
+  --cyan: #3fd8ff;
+  --amber: #ffb347;
+  --coral: #ff6b6b;
+  --violet: #9b7bff;
+  --green: #4fe0a0;
+  --ink: #e8f1f8;
+  --dim: #8aa0b2;
+}
+html, body {
+  margin: 0;
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  background: #04060b;
+  color: var(--ink);
+  font-family: Poppins, "Segoe UI", system-ui, sans-serif;
+}
+#c { position: absolute; inset: 0; width: 1920px; height: 1080px; }
+
+/* chapter marker, top left */
+.chapter {
+  position: absolute; left: 96px; top: 76px;
+  font-size: 22px; font-weight: 500; letter-spacing: .24em; text-transform: uppercase;
+  color: var(--cyan); opacity: 0;
+}
+.chapter b { color: var(--amber); font-weight: 600; margin-right: 16px; }
+
+/* labels the page places on its picture */
+.label {
+  position: absolute; left: 0; top: 0;
+  transform: translate(-50%, -50%);
+  font-size: 30px; font-weight: 500; line-height: 1.2; text-align: center;
+  white-space: nowrap; opacity: 0;
+  text-shadow: 0 0 24px rgba(0, 0, 0, .9), 0 0 6px rgba(0, 0, 0, .9);
+}
+.label small { display: block; font-size: 21px; font-weight: 300; color: var(--dim); letter-spacing: .02em; }
+.label.cyan { color: var(--cyan); }
+.label.amber { color: var(--amber); }
+.label.coral { color: var(--coral); }
+.label.violet { color: var(--violet); }
+.label.green { color: var(--green); }
+.label.big { font-size: 46px; font-weight: 600; }
+
+/* a small evidence tag under a label */
+.tag {
+  display: inline-block; margin-top: 10px; padding: 5px 14px;
+  border: 1px solid rgba(255, 255, 255, .28); border-radius: 999px;
+  font-size: 17px; font-weight: 400; letter-spacing: .08em; text-transform: uppercase; color: var(--ink);
+}
+
+/* black over everything, for each shot's fade in and out */
+#fade { position: absolute; inset: 0; background: #000; pointer-events: none; }

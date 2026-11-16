@@ -1,0 +1,169 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="shared/style.css">
+<style>
+  #title { font-size: 92px; font-weight: 600; letter-spacing: -.01em; }
+  #title small { font-size: 32px; margin-top: 14px; color: var(--cyan); letter-spacing: .18em; text-transform: uppercase; font-weight: 400; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="label" id="title">The Molecular Messengers<small>The chemistry and science of peptides</small></div>
+<div class="label" id="count">≈ 37 trillion cells<small>each one sending and receiving chemical signals</small></div>
+<div class="label cyan big" id="pep">Peptides<small>short chains of amino acids</small></div>
+<div id="fade"></div>
+<script type="module">
+import { W, H, C, canvas, duration, background, sphere, bond, rng, seg, ease, easeOut, lerp, rgba, place, inOut, frameFade, fontsReady, clamp } from "./shared/lib.js";
+
+const D = duration(27);
+const ctx = canvas();
+const $ = (id) => document.getElementById(id);
+
+// tissue: a field of cells, in world units around the zoom centre
+const R = rng(7);
+const cells = [];
+for (let i = 0; i < 260; i++) {
+  const a = R() * Math.PI * 2, d = Math.sqrt(R()) * 1400;
+  cells.push({ x: Math.cos(a) * d, y: Math.sin(a) * d * 0.62, r: 26 + R() * 22, hue: R() });
+}
+// a capillary runs through the field, under the zoom centre
+function tissue(t, z, alpha) {
+  if (alpha <= 0) return;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  const cx = W / 2, cy = H / 2;
+  // capillary
+  ctx.lineCap = "round";
+  for (const [w, a] of [[64, 0.12], [34, 0.35], [16, 0.7]]) {
+    ctx.strokeStyle = rgba(C.red, a);
+    ctx.lineWidth = w * z;
+    ctx.beginPath();
+    for (let x = -1500; x <= 1500; x += 30) {
+      const y = (Math.cos(x / 260) - 1) * 50;
+      const sx = cx + x * z, sy = cy + y * z;
+      x === -1500 ? ctx.moveTo(sx, sy) : ctx.lineTo(sx, sy);
+    }
+    ctx.stroke();
+  }
+  for (const c of cells) {
+    if (Math.abs(c.y - (Math.cos(c.x / 260) - 1) * 50) < c.r + 30) continue; // leave room for the vessel
+    const sx = cx + c.x * z, sy = cy + c.y * z, r = c.r * z * (1 + 0.03 * Math.sin(t * 1.3 + c.hue * 9));
+    if (sx < -r || sx > W + r || sy < -r || sy > H + r) continue;
+    const g = ctx.createRadialGradient(sx - r * 0.3, sy - r * 0.3, r * 0.1, sx, sy, r);
+    const col = c.hue < 0.7 ? C.cyan : C.violet;
+    g.addColorStop(0, rgba(col, 0.2));
+    g.addColorStop(1, rgba(col, 0.05));
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(sx, sy, r, 0, 7); ctx.fill();
+    ctx.strokeStyle = rgba(col, 0.45);
+    ctx.lineWidth = Math.max(1, 1.6 * z);
+    ctx.stroke();
+    sphere(ctx, sx + r * 0.15, sy - r * 0.1, r * 0.32, C.amber, 0.55, 0.3);
+  }
+  ctx.restore();
+}
+
+// inside the capillary
+const rbc = [];
+const R2 = rng(11);
+for (let i = 0; i < 24; i++) rbc.push({ x0: R2() * (W + 500), y: 300 + R2() * 480, s: 0.55 + R2() * 0.8, v: 90 + R2() * 110, ph: R2() * 6.28 });
+rbc.sort((a, b) => a.s - b.s);
+const chains = [];
+for (let i = 0; i < 10; i++) chains.push({ x0: R2() * (W + 600), y: 320 + R2() * 440, n: 5 + Math.floor(R2() * 4), s: 0.6 + R2() * 0.6, v: 150 + R2() * 120, ph: R2() * 6.28 });
+
+function wall(y0, dir, t) {
+  ctx.save();
+  const g = ctx.createLinearGradient(0, y0, 0, y0 + dir * 190);
+  g.addColorStop(0, rgba("#7a1d33", 0.0));
+  g.addColorStop(0.35, rgba("#7a1d33", 0.55));
+  g.addColorStop(1, rgba("#2a0711", 0.95));
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.moveTo(0, y0 + dir * 400);
+  for (let x = 0; x <= W; x += 40) ctx.lineTo(x, y0 + Math.sin(x / 210 + t * 0.4 + dir) * 14);
+  ctx.lineTo(W, y0 + dir * 400);
+  ctx.fill();
+  // endothelial cells
+  ctx.strokeStyle = rgba(C.coral, 0.22);
+  ctx.lineWidth = 2;
+  for (let k = 0; k < 12; k++) {
+    const x = ((k * 190 + t * 22) % (W + 200)) - 100;
+    ctx.beginPath();
+    ctx.ellipse(x, y0 + dir * 46, 92, 22, 0, 0, 7);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function redCell(x, y, R, ang) {
+  const ry = R * (0.3 + 0.7 * Math.abs(Math.cos(ang)));
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(0.3 * Math.sin(ang * 0.7));
+  const g = ctx.createRadialGradient(-R * 0.2, -ry * 0.2, R * 0.05, 0, 0, R);
+  g.addColorStop(0, "#c2283f");
+  g.addColorStop(0.45, "#7c0f22");
+  g.addColorStop(0.75, "#d8394a");
+  g.addColorStop(1, "#5c0a19");
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.ellipse(0, 0, R, ry, 0, 0, 7); ctx.fill();
+  ctx.restore();
+}
+
+function chain(x, y, n, s, t, ph, glow = 0.8) {
+  const pts = [];
+  for (let i = 0; i < n; i++) pts.push({ x: x - i * 26 * s, y: y + Math.sin(t * 3 + ph + i * 0.9) * 9 * s, r: 9 * s, col: i === 0 || i === n - 1 ? C.amber : C.cyan });
+  for (let i = 1; i < n; i++) bond(ctx, pts[i - 1].x, pts[i - 1].y, pts[i].x, pts[i].y, 3.5 * s, C.cyan, 0.9);
+  for (const p of pts) sphere(ctx, p.x, p.y, p.r, p.col, 1, glow);
+}
+
+function capillary(t, alpha, zoom) {
+  if (alpha <= 0) return;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.translate(W / 2, H / 2); ctx.scale(zoom, zoom); ctx.translate(-W / 2, -H / 2);
+  const plasma = ctx.createLinearGradient(0, 200, 0, 880);
+  plasma.addColorStop(0, "rgba(60,10,25,.0)");
+  plasma.addColorStop(0.5, "rgba(70,14,30,.35)");
+  plasma.addColorStop(1, "rgba(60,10,25,.0)");
+  ctx.fillStyle = plasma; ctx.fillRect(0, 160, W, 760);
+  const items = [];
+  for (const c of rbc) items.push({ s: c.s, draw: () => redCell(((c.x0 + t * c.v) % (W + 500)) - 250, c.y + Math.sin(t * 0.6 + c.ph) * 18, 78 * c.s, t * 0.8 + c.ph) });
+  for (const c of chains) items.push({ s: c.s + 0.05, draw: () => chain(((c.x0 + t * c.v) % (W + 600)) - 150, c.y + Math.sin(t * 0.8 + c.ph) * 26, c.n, c.s, t, c.ph) });
+  items.sort((a, b) => a.s - b.s);
+  for (const it of items) it.draw();
+  wall(240, -1, t);
+  wall(840, 1, t);
+  ctx.restore();
+}
+
+window.film = {
+  duration: D,
+  ready: fontsReady(),
+  frame(t) {
+    background(ctx, t, 3, C.cyan);
+    const zu = ease(seg(t, 4, 13));
+    const z = Math.exp(Math.log(40) * zu) * 0.55;
+    tissue(t, z, 1 - seg(t, 10.5, 13));
+    capillary(t, seg(t, 10.5, 13.5), lerp(1.35, 1, easeOut(seg(t, 10.5, 15))));
+
+    // the chain the narration names, swimming into the foreground
+    const hu = easeOut(seg(t, D * 0.66, D * 0.82));
+    if (hu > 0) {
+      const x = lerp(-300, 1080, hu) + Math.sin(t * 0.7) * 20, y = 600 + Math.sin(t * 1.1) * 14;
+      ctx.save(); ctx.globalAlpha = hu;
+      chain(x, y, 7, 2.3, t, 0, 1.2);
+      ctx.restore();
+      place($("pep"), x - 180, y - 130, inOut(t, D * 0.74, D, 0.8));
+    } else place($("pep"), 0, 0, 0);
+
+    place($("title"), W / 2, H / 2 - 20, inOut(t, 0.6, 5.2, 0.9), 1 + t * 0.006);
+    place($("count"), W / 2, 920, inOut(t, 3, 10.5, 0.7));
+    frameFade(t, D);
+  },
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="chapter"><b>06</b>Breakdown and stability</div>
+<div class="label coral" id="enz">Peptidases<small>enzymes that cut peptide bonds</small></div>
+<div class="label" id="recyc">Recycled into amino acids</div>
+<div class="label amber" id="ac">Acetyl cap<small>start of the chain</small></div>
+<div class="label green" id="am">Amide<small>end of the chain</small></div>
+<div class="label violet" id="dd">D-amino acids<small>mirror-image building blocks</small></div>
+<div class="label cyan" id="prot">Slower to break down<small>while keeping its activity</small></div>
+<div id="fade"></div>
+<script type="module">
+import { W, H, C, canvas, duration, background, sphere, bond, rng, seg, ease, easeOut, lerp, rgba, shade, place, inOut, frameFade, fontsReady, clamp, bump, warp } from "./shared/lib.js";
+
+const D = duration(33);
+const T = warp([[0, 0], [3.5, 5.8], [5.2, 7.5], [7.6, 9.5], [8.2, 10.3], [11, 12.9], [11.2, 13.2], [12.4, 14.2], [13.8, 19.4], [16.8, 20.6], [19.3, 23.5], [23.3, 26.6], [25, 28.2], [29, 33]]);
+const ctx = canvas();
+const $ = (id) => document.getElementById(id);
+
+const N = 9, GAP = 92, CX = W / 2, CY = 520;
+const slotX = (i) => CX + (i - (N - 1) / 2) * GAP;
+const slotY = (i, t) => CY + Math.sin(t * 1.4 + i * 0.8) * 16;
+
+function enzyme(x, y, r, facing, bite, alpha) {
+  if (alpha <= 0) return;
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  ctx.translate(x, y); ctx.rotate(facing);
+  const m = 0.12 + 0.5 * bite;
+  const g = ctx.createRadialGradient(-r * 0.3, -r * 0.3, r * 0.1, 0, 0, r);
+  g.addColorStop(0, shade(C.coral, 0.4)); g.addColorStop(0.7, shade(C.coral, -0.3)); g.addColorStop(1, shade(C.coral, -0.6));
+  ctx.fillStyle = g;
+  ctx.shadowColor = rgba(C.coral, 0.6); ctx.shadowBlur = 40;
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, r, m, Math.PI * 2 - m); ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+// a natural chain, cut in three places
+const CUTS = [{ bond: 2, at: 5.2 }, { bond: 5, at: 6.4 }, { bond: 7, at: 7.6 }];
+const R = rng(61);
+const scatter = Array.from({ length: N }, () => ({ vx: (R() - 0.5) * 160, vy: (R() - 0.5) * 220, spin: R() * 6 }));
+
+function natural(t, alpha) {
+  if (alpha <= 0) return;
+  ctx.save(); ctx.globalAlpha *= alpha;
+  const fall = easeOut(seg(t, T(8.2), T(11)));
+  const pts = [];
+  for (let i = 0; i < N; i++) {
+    let dx = 0;
+    for (const c of CUTS) if (t > T(c.at)) dx += (i > c.bond ? 1 : -1) * 26 * easeOut(seg(t, T(c.at), T(c.at) + 1.2));
+    pts.push({ x: slotX(i) + dx + scatter[i].vx * fall, y: slotY(i, t) + scatter[i].vy * fall, r: 22, col: C.cyan });
+  }
+  for (let i = 0; i < N - 1; i++) {
+    const cut = CUTS.find((c) => c.bond === i);
+    const a = cut ? 1 - seg(t, T(cut.at), T(cut.at) + 0.25) : 1 - seg(t, T(8.2), T(8.8));
+    bond(ctx, pts[i].x, pts[i].y, pts[i + 1].x, pts[i + 1].y, 7, C.white, a);
+    if (cut) {
+      const f = Math.max(0, 1 - Math.abs(t - T(cut.at)) / 0.5);
+      if (f > 0) { const mx = (pts[i].x + pts[i + 1].x) / 2, my = (pts[i].y + pts[i + 1].y) / 2, g = ctx.createRadialGradient(mx, my, 0, mx, my, 120); g.addColorStop(0, rgba(C.coral, 0.7 * f)); g.addColorStop(1, rgba(C.coral, 0)); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(mx, my, 120, 0, 7); ctx.fill(); }
+    }
+  }
+  for (const p of pts) sphere(ctx, p.x, p.y, p.r, p.col, 1, 0.7);
+  // the enzymes: each glides to its bond, bites, and moves on
+  CUTS.forEach((c, j) => {
+    const i = c.bond, x = (slotX(i) + slotX(i + 1)) / 2, above = j % 2 === 0;
+    const come = ease(seg(t, T(c.at) - 1.8, T(c.at) - 0.2)), go = easeOut(seg(t, T(c.at) + 0.4, T(c.at) + 2.4));
+    const y = CY + (above ? -1 : 1) * lerp(420, 70, come) + (above ? -1 : 1) * go * 380;
+    const bite = Math.max(0, 1 - Math.abs(t - T(c.at)) / 0.35);
+    enzyme(x, y, 62, above ? Math.PI / 2 : -Math.PI / 2, 1 - bite, seg(t, T(3), T(4)) * (1 - go));
+  });
+  ctx.restore();
+}
+
+function hexagon(x, y, r, col, label, alpha) {
+  if (alpha <= 0) return;
+  ctx.save(); ctx.globalAlpha *= alpha;
+  ctx.beginPath();
+  for (let i = 0; i < 6; i++) { const a = Math.PI / 3 * i; ctx.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r); }
+  ctx.closePath();
+  ctx.fillStyle = shade(col, -0.35); ctx.shadowColor = rgba(col, 0.8); ctx.shadowBlur = 30; ctx.fill();
+  ctx.shadowBlur = 0; ctx.strokeStyle = shade(col, 0.4); ctx.lineWidth = 3; ctx.stroke();
+  ctx.fillStyle = "#fff"; ctx.font = "600 26px Poppins, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText(label, x, y + 2);
+  ctx.restore();
+}
+
+function modified(t, alpha) {
+  if (alpha <= 0) return;
+  ctx.save(); ctx.globalAlpha *= alpha;
+  const pts = Array.from({ length: N }, (_, i) => ({ x: slotX(i), y: slotY(i, t) }));
+  const capA = easeOut(seg(t, T(13.8), T(14.8))), capB = easeOut(seg(t, T(16.8), T(17.8))), dA = seg(t, T(19.3), T(20.3));
+  const ac = { x: slotX(0) - 100, y: slotY(0, t) }, am = { x: slotX(N - 1) + 100, y: slotY(N - 1, t) };
+  bond(ctx, ac.x, ac.y, pts[0].x, pts[0].y, 7, C.amber, capA);
+  bond(ctx, pts[N - 1].x, pts[N - 1].y, am.x, am.y, 7, C.green, capB);
+  for (let i = 0; i < N - 1; i++) bond(ctx, pts[i].x, pts[i].y, pts[i + 1].x, pts[i + 1].y, 7, C.white, 1);
+  pts.forEach((p, i) => {
+    const isD = i === 3 || i === 6;
+    sphere(ctx, p.x, p.y, 22, isD && dA > 0 ? C.violet : C.cyan, 1, 0.7 + (isD ? dA * 0.8 : 0));
+    if (isD && dA > 0) { ctx.save(); ctx.globalAlpha *= dA; ctx.fillStyle = "#fff"; ctx.font = "600 22px Poppins, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("D", p.x, p.y + 1); ctx.restore(); }
+  });
+  hexagon(ac.x - 40 * (1 - capA), ac.y, 38, C.amber, "Ac", capA);
+  hexagon(am.x + 40 * (1 - capB), am.y, 38, C.green, "NH₂", capB);
+  // enzymes try, and bounce off a shield
+  const tries = [{ x: slotX(1) + 46, above: true, at: 23.3 }, { x: slotX(5) + 46, above: false, at: 24.1 }];
+  for (const e of tries) {
+    const hit = T(e.at), come = ease(seg(t, hit - 1.6, hit)), back = easeOut(seg(t, hit, hit + 2.2));
+    const s = e.above ? -1 : 1;
+    const y = CY + s * (lerp(440, 95, come) + back * 340);
+    enzyme(e.x, y, 62, e.above ? Math.PI / 2 : -Math.PI / 2, 0.9, seg(t, hit - 1.6, hit - 1.1) * (1 - seg(t, hit + 1.4, hit + 2.2)));
+    const f = Math.max(0, 1 - Math.abs(t - hit) / 0.6);
+    if (f > 0) { ctx.strokeStyle = rgba(C.cyan, 0.8 * f); ctx.lineWidth = 5; ctx.beginPath(); ctx.ellipse(e.x, CY + s * 46, 90, 22, 0, 0, 7); ctx.stroke(); }
+  }
+  ctx.restore();
+  return { ac, am };
+}
+
+window.film = {
+  duration: D,
+  ready: fontsReady(),
+  frame(t) {
+    background(ctx, t, 23, C.coral, [0.5, 0.5]);
+    const sw = seg(t, T(11.2), T(12.4));
+    natural(t, 1 - sw);
+    const m = modified(t, sw) || { ac: { x: 0, y: 0 }, am: { x: 0, y: 0 } };
+    place($("enz"), W / 2, 200, inOut(t, T(3.5), T(8.5)));
+    place($("recyc"), W / 2, 900, inOut(t, T(8.6), T(11.6)));
+    place($("ac"), m.ac.x, CY - 150, inOut(t, T(14.3), T(22)) * sw);
+    place($("am"), m.am.x, CY - 150, inOut(t, T(17.3), T(22)) * sw);
+    place($("dd"), slotX(4.5), CY + 170, inOut(t, T(19.8), T(22.4)) * sw);
+    place($("prot"), W / 2, 820, inOut(t, T(25), D) * sw);
+    frameFade(t, D);
+  },
+};
+</script>
+</body>
+</html>

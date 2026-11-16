@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="chapter"><b>02</b>Peptides vs proteins</div>
+<div class="label amber" id="aa">Amino acid<small>a single letter</small></div>
+<div class="label cyan" id="pep">Peptide<small>a short word · about 2–50 amino acids</small></div>
+<div class="label violet" id="pro">Protein<small>a whole book · 50+ amino acids, folded in 3D</small></div>
+<div id="fade"></div>
+<script type="module">
+import { W, H, C, canvas, duration, background, bond, rng, seg, ease, easeOut, lerp, rgba, shade, place, inOut, frameFade, fontsReady, camera, clamp, proteinPath, ribbon } from "./shared/lib.js";
+
+const D = duration(38);
+const ctx = canvas();
+const $ = (id) => document.getElementById(id);
+
+// 15 residues, one letter each
+const SEQ = "GEPPPGKPADDAGLV";
+const typeCol = (ch) => ("DE".includes(ch) ? C.coral : "KRH".includes(ch) ? C.blue : "GAVLIPM".includes(ch) ? C.amber : C.cyan);
+const N = SEQ.length;
+
+const R = rng(21);
+const starts = SEQ.split("").map(() => ({ x: R() * W, y: R() < 0.5 ? -120 - R() * 200 : H + 120 + R() * 200, rot: (R() - 0.5) * 3 }));
+const drift = SEQ.split("").map(() => ({ x: 200 + R() * (W - 400), y: 200 + R() * (H - 400), ph: R() * 6.28 }));
+
+const T_SOLO = 13, T_SNAP = 16.4, STEP = 0.3, T_SHRINK = 22, T_PROT = 21.5;
+
+function block(x, y, s, ch, rot, alpha, glow) {
+  if (alpha <= 0) return;
+  const col = typeCol(ch), r = 40 * s;
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  ctx.translate(x, y); ctx.rotate(rot);
+  if (glow > 0) { ctx.shadowColor = rgba(col, 0.9); ctx.shadowBlur = 40 * glow * s; }
+  const g = ctx.createLinearGradient(-r, -r, r, r);
+  g.addColorStop(0, shade(col, 0.35));
+  g.addColorStop(1, shade(col, -0.45));
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.roundRect(-r, -r, 2 * r, 2 * r, 14 * s); ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = shade(col, 0.6, 0.8); ctx.lineWidth = 2 * s; ctx.stroke();
+  ctx.fillStyle = "#06101a";
+  ctx.font = `600 ${44 * s}px Poppins, sans-serif`;
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText(ch, 0, 3 * s);
+  ctx.restore();
+}
+
+function chainSlot(i, t) {
+  const sh = ease(seg(t, T_SHRINK, T_SHRINK + 2.2));
+  const s = lerp(1, 0.56, sh), cx = lerp(W / 2, 530, sh), cy = lerp(H / 2 + 40, H / 2 + 60, sh);
+  return { x: cx + (i - (N - 1) / 2) * 104 * s, y: cy + Math.sin(i * 0.75 + t * 0.9) * 26 * s, s };
+}
+
+// the protein: one long chain folded into a compact 3D tangle with helical stretches
+const PRO = proteinPath();
+function protein(t, grow, alpha) {
+  const cam = camera({ yaw: t * 0.28, pitch: 0.35 + 0.1 * Math.sin(t * 0.3), cx: 1390, cy: H / 2 + 40, dist: 900, f: 1050 });
+  ribbon(ctx, PRO, cam, { grow, alpha });
+}
+
+window.film = {
+  duration: D,
+  ready: fontsReady(),
+  frame(t) {
+    background(ctx, t, 5, C.cyan);
+
+    // letters drifting in the dark while the question is asked
+    const driftA = 1 - seg(t, T_SOLO - 1.5, T_SOLO);
+    for (let i = 0; i < N; i++) {
+      const d = drift[i];
+      block(d.x + Math.sin(t * 0.4 + d.ph) * 40, d.y + Math.cos(t * 0.35 + d.ph) * 30, 0.6, SEQ[i], Math.sin(t * 0.3 + d.ph) * 0.5, 0.35 * driftA * seg(t, 0.5, 2.5), 0);
+    }
+
+    // one amino acid alone, then fifteen snapping into a chain
+    const pts = [];
+    for (let i = 0; i < N; i++) {
+      const slot = chainSlot(i, t);
+      let x, y, s, rot, a;
+      if (i === 0) {
+        const solo = { x: W / 2, y: H / 2 + 40 };
+        const m = ease(seg(t, T_SNAP, T_SNAP + 0.9));
+        x = lerp(solo.x, slot.x, m); y = lerp(solo.y, slot.y, m);
+        s = lerp(1.7, slot.s, m) * (1 + 0.04 * Math.sin(t * 2)); rot = 0;
+        a = seg(t, T_SOLO, T_SOLO + 0.8);
+      } else {
+        const at = T_SNAP + i * STEP, m = ease(seg(t, at, at + 0.9));
+        x = lerp(starts[i].x, slot.x, m); y = lerp(starts[i].y, slot.y, m);
+        s = slot.s; rot = starts[i].rot * (1 - m); a = seg(t, at, at + 0.3);
+      }
+      pts.push({ x, y, s, rot, a, arrived: i === 0 ? t >= T_SNAP + 0.9 : t >= T_SNAP + i * STEP + 0.9 });
+    }
+    for (let i = 1; i < N; i++) if (pts[i].arrived && pts[i - 1].arrived) bond(ctx, pts[i - 1].x, pts[i - 1].y, pts[i].x, pts[i].y, 6 * pts[i].s, C.white, 0.8);
+    for (let i = 0; i < N; i++) {
+      const p = pts[i], arrive = i === 0 ? T_SNAP + 0.9 : T_SNAP + i * STEP + 0.9;
+      block(p.x, p.y, p.s, SEQ[i], p.rot, p.a, Math.max(0, 1 - Math.abs(t - arrive) * 2.5) + (i === 0 && t < T_SNAP ? 0.5 : 0));
+    }
+
+    protein(t, easeOut(seg(t, T_PROT, T_PROT + 4)), seg(t, T_PROT, T_PROT + 0.8));
+
+    place($("aa"), W / 2, H / 2 - 120, inOut(t, T_SOLO + 0.5, T_SNAP + 0.3));
+    const c0 = chainSlot(7, t);
+    place($("pep"), c0.x, c0.y - 130 * c0.s - 10, inOut(t, T_SNAP + 15 * STEP, D));
+    place($("pro"), 1390, 210, inOut(t, T_PROT + 1.5, D));
+    frameFade(t, D);
+  },
+};
+</script>
+</body>
+</html>
