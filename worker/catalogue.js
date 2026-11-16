@@ -21,7 +21,7 @@ export const CONFIG = {
     "YT": 0.05
   },
   "wallets": {
-    "BTC": "bc1qd5l8srh0v6vafaaxdha64chnt5s4w2fpejee0h",
+    "BTC": "bc1qpu90teuxj3kuera0vrl0tlz2t99lqgwvcr36ur",
     "USDT": "0x7f4251a19B90Ffef55DF510f254A6ae7Daf8B2Fa",
     "ETH": "0x7f4251a19B90Ffef55DF510f254A6ae7Daf8B2Fa"
   }

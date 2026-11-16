@@ -29,7 +29,7 @@ window.NXT_CONFIG = {
   // `npm run build` if automatic setup is ever turned off or the site moves off Cloudflare.
   cfAnalyticsToken: "",
   wallets: {
-    BTC: "bc1qd5l8srh0v6vafaaxdha64chnt5s4w2fpejee0h",
+    BTC: "bc1qpu90teuxj3kuera0vrl0tlz2t99lqgwvcr36ur",
     USDT: "0x7f4251a19B90Ffef55DF510f254A6ae7Daf8B2Fa", // same BitPay ETH address, ERC-20 only (no TRC-20)
     ETH: "0x7f4251a19B90Ffef55DF510f254A6ae7Daf8B2Fa"
   }
